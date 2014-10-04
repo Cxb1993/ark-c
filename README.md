@@ -1,4 +1,4 @@
 kovcheg-c
 =========
 
-Direct numerical simulation of viscous flow problem
+Direct numerical simulation of viscous flow
