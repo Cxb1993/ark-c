@@ -13,12 +13,28 @@
 int L, N1, N2, N3, NSTOP, NPRINT, NSTEP, N1G, N2G, N3G;
 
 //     ---------------------------------------------------------------------------------
-//     X1(:) - Coordinates of the grid nodes along the axis X1
-//     X2(:) - Coordinates of the grid nodes along the axis X2
-//     X3(:) - Coordinates of the grid nodes along the axis X3
+//     X1E - coordinates of the east border
+//     X1W - coordinates of the west border
+//     X2N - coordinates of the north border
+//     X2S - coordinates of the south border
+//     X3T - coordinates of the top border
+//     X3B - coordinates of the bottom border
+
+double X1E, X1W, X2N, X2S, X3T, X3B;
+
+//     ---------------------------------------------------------------------------------
+//	   DX1 - grid step along X1 axis
+//	   DX2 - grid step along X2 axis
+//	   DX3 - grid step along X3 axis
+
+double DX1, DX2, DX3;
+
+//     ---------------------------------------------------------------------------------
+//     X1(:) - coordinates of the grid nodes along the axis X1
+//     X2(:) - coordinates of the grid nodes along the axis X2
+//     X3(:) - coordinates of the grid nodes along the axis X3
 
 double *X1, *X2, *X3;
-
 //     ----------------------------------------------------------------------------------
 //     ROCON(:,:,:) - conservative density at the current time step
 //     U1CON(:,:,:) - conservative speed at the current time step along the axis X1
