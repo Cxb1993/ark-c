@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "headers/forces.h"
 #include "headers/bulk.h"
 #include "headers/constants.h"
@@ -195,6 +196,13 @@ void Input()
 
 void InitializeData()
 {
+//	double	ALFA0 = 0.204,
+//			BETA = 0.3,
+//			R0 = 0.05;
+
+	// init value of time step
+	DT = pow(10, -4);
+
 	// grid step along the X1 axis
 	DX1=(X1E-X1W)/(N1-1);
 	DX2=(X2N-X2S)/(N2-1);
@@ -204,7 +212,7 @@ void InitializeData()
 	X2[0] = X2S - DX2;
 	X3[0] = X3B - DX3;
 
-	//
+	// block of arrays initialization
 	for (int i = 0; i <= N1 ; ++i) {
 		X1[i+1] = X1[i] + DX1;
 	}
@@ -216,11 +224,100 @@ void InitializeData()
 	for (int k = 0; k <= N3 ; ++k) {
 		X3[k +1] = X3[k] + DX3;
 	}
+
+	for (int i = 0; i <= N1; ++i) {
+		for (int j = 0; j <= N2; ++j) {
+			for (int k = 0; k <= N3; ++k) {
+				U1CON[i][j][k] = U1NCON[i][j][k] = U10;
+				U2CON[i][j][k] = U2NCON[i][j][k] = U20;
+				U3CON[i][j][k] = U3NCON[i][j][k] = U30;
+				ROCON[i][j][k] = RONCON[i][j][k] = RO0G;
+				TCON[i][j][k] = TNCON[i][j][k] = T0;
+
+				P1[i][j][k] = P2[i][j][k] = P3[i][j][k] = 0.;
+				RO1[i][j][k] = RO2[i][j][k] = RO3[i][j][k] = RO0G;
+				U11[i][j][k] = U12[i][j][k] = U13[i][j][k] = U10;
+				U21[i][j][k] = U22[i][j][k] = U23[i][j][k] = U20;
+				U31[i][j][k] = U32[i][j][k] = U33[i][j][k] = U30;
+				T1[i][j][k] = T2[i][j][k] = T3[i][j][k] = T0;
+			}
+
+		}
+	}
+
+	for (int j = 0; j <= N2; ++j) {
+		for (int k = 0; k <= N3; ++k) {
+			P1[N1+1][j][k] = 0.;
+			RO1[N1+1][j][k] = RO0G;
+			U11[N1+1][j][k] = U10;
+			U21[N1+1][j][k] = U20;
+			U31[N1+1][j][k] = U30;
+			T1[N1+1][j][k] = T0;
+		}
+	}
+
+	for (int i = 0; i <= N1; ++i) {
+		for (int k = 0; k <= N3; ++k) {
+			P2[i][N2+1][k] = 0.;
+			RO2[i][N2+1][k] = RO0G;
+			U12[i][N2+1][k] = U10;
+			U22[i][N2+1][k] = U20;
+			U32[i][N2+1][k] = U30;
+			T2[i][N2+1][k] = T0;
+		}
+	}
+
+	for (int i = 0; i <= N1; ++i) {
+		for (int j = 0; j <= N2; ++j) {
+			P3[i][j][N3+1] = 0.;
+			RO3[i][j][N3+1] = RO0G;
+			U13[i][j][N3+1] = U10;
+			U23[i][j][N3+1] = U20;
+			U33[i][j][N3+1] = U30;
+			T3[i][j][N3+1] = T0;
+		}
+	}
+
 }
 
 void TimeStepSize()
 {
-	DT = 0.1;
+	double X1C, X1L, U1C, U2C, U3C, DTU1, DTU2, DTU3, DTU, DTV1, DTV2, DTV3, DTV;
+
+	for (int i = 1; i < N1; ++i) {
+		for (int j = 1; j < N2; ++j) {
+			for (int k = 1; k < N3; ++k) {
+				X1C = (X1[i+1] + X1[i])/2;
+				X1L = 1+(L-1)*(X1C-1);
+
+				U1C = U1CON[i][j][k];
+				U2C = U2CON[i][j][k];
+				U3C = U3CON[i][j][k];
+
+				DTU1 = CFL*DX1/(SOUND + fabs(U1C));
+				DTU2 = CFL*X1L*DX2/(SOUND + fabs(U2C));
+				DTU3 = CFL*DX3/(SOUND + fabs(U3C));
+
+				// DTU = MIN(DTU1, DTU2, DTU3)
+				DTU = DTU1 > DTU2 ? DTU2 : DTU1;
+				DTU = DTU > DTU3 ? DTU3 : DTU;
+
+				if (VIS > pow(10, -16)) {
+					DTV1 = CFL*DX1*DX1/(2.*VIS);
+					DTV2 = CFL*(X1L*DX2)*(X1L*DX2)/(2.*VIS);
+					DTV3 = CFL*DX3*DX3/(2.*VIS);
+
+					// DTV = MIN (DTV1, DTV2, DTV3)
+					DTV = DTV1 > DTV2 ? DTV2 : DTV1;
+					DTV = DTV > DTV3 ? DTV3 : DTV;
+				} else {
+					DTV = pow(10, 16);
+				}
+				double dttemp = DTU > DTV ? DTV : DTU;
+				if (dttemp < DT) DT = dttemp;
+			}
+		}
+	}
 }
 
 void Phase1()
