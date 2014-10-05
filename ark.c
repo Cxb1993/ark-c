@@ -337,6 +337,26 @@ void StressTensor()
 
 void UseForces()
 {
+	double XLE, XLW, DVC, ROC, ROCN;
+
+	for (int i = 1; i < N1; ++i) {
+		for (int j = 1; j < N2; ++j) {
+			for (int k = 1; k < N3; ++k) {
+				// geometric factor of cylindricity
+				XLE = 1+(L-1)*(X1[i+1]-1);
+				XLW = 1+(L-1)*(X1[i]-1);
+				// cell volume
+				DVC = 0.5*(XLE+XLW)*DX1*DX2*DX3;
+
+				ROC = ROCON[i][j][k];
+				ROCN = RONCON[i][j][k];
+
+				U1NCON[i][j][k] = (ROC*DVC*U1NCON[i][j][k] + 0.5*DT*F1[i][j][k])/(DVC*ROCN);
+				U2NCON[i][j][k] = (ROC*DVC*U2NCON[i][j][k] + 0.5*DT*F2[i][j][k])/(DVC*ROCN);
+				U3NCON[i][j][k] = (ROC*DVC*U3NCON[i][j][k] + 0.5*DT*F3[i][j][k])/(DVC*ROCN);
+			}
+		}
+	}
 
 }
 
