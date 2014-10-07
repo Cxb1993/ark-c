@@ -1,4 +1,4 @@
-kovcheg-c
+ark-c
 =========
 
 Direct numerical simulation of viscous flow
