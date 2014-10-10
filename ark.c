@@ -93,22 +93,22 @@ void Input()
 	// initial temperature
 	T0=1.;
 
-	// initial speed along the X1 axis
+	// initial velocity along the X1 axis
 	U10=0.;
-	// initial speed along the X2 axis
+	// initial velocity along the X2 axis
 	U20=0.;
-	// initial speed along the X3 axis
+	// initial velocity along the X3 axis
 	U30=1.;
-	// sound speed
+	// sound velocity
 	SOUND=10.;
 
 	// pressure on the top border
 	POUTLET=0;
-	// speed on the bottom border along the X3 axis
+	// velocity on the bottom border along the X3 axis
 	U3INLET=U30;
-	// speed on the bottom border along the X2 axis
+	// velocity on the bottom border along the X2 axis
 	U2INLET=U20;
-	// speed on the bottom border along the X1 axis
+	// velocity on the bottom border along the X1 axis
 	U1INLET=U10;
 	// temperature on the bottom border
 	TINLET=T0;
@@ -117,7 +117,10 @@ void Input()
 	// unperturbed density of the borders material
 	RO0S=100000000.;
 
-	// block of arrays allocation
+	// #####################################################
+	// 				block of arrays allocation
+	// #####################################################
+
 	// coordinates of grid nodes along the all of the axises
 	X1 = calloc((size_t) (N1+2), sizeof(double));
 	X2 = calloc((size_t) (N2+2), sizeof(double));
@@ -332,6 +335,195 @@ void Phase2()
 
 void StressTensor()
 {
+	// initialization of friction stress arrays
+	for (int i = 0; i <= N1; ++i) {
+		for (int j = 0; j <= N2; ++j) {
+			for (int k = 0; k <= N3; ++k) {
+				SIGM11[i][j][k] = 0.0;
+				SIGM21[i][j][k] = 0.0;
+				SIGM31[i][j][k] = 0.0;
+
+				SIGM12[i][j][k] = 0.0;
+				SIGM22[i][j][k] = 0.0;
+				SIGM32[i][j][k] = 0.0;
+
+				SIGM13[i][j][k] = 0.0;
+				SIGM23[i][j][k] = 0.0;
+				SIGM33[i][j][k] = 0.0;
+			}
+		}
+	}
+
+	// #####################################################
+	// 				boundary conditions
+	// #####################################################
+
+	// no-slip condition on the boundary faces perpendicular to X1
+	X1[0] = X1[1];
+	X1[N1+1] = X1[N1];
+
+	for (int j = 1; j < N2 ; ++j) {
+		for (int k = 1; k < N3; ++k) {
+			U1CON[0][j][k] = 0.;
+			U2CON[0][j][k] = 0.;
+			U3CON[0][j][k] = 0.;
+
+			U1CON[N1][j][k] = 0.;
+			U2CON[N1][j][k] = 0.;
+			U3CON[N1][j][k] = 0.;
+		}
+
+	}
+
+	// periodic contition on the boundary faces perpendicular to X2
+	// nothing to do since we have uniform grid
+
+	// periodic contition on the boundary faces perpendicular to X3
+	// nothing to do since we have uniform grid
+
+	// #####################################################
+	// 				crawling along the faces
+	// #####################################################
+
+	double XLE, XLW, XLT, XLN, U1C, U1CE, U2C, U2CE, U3C, U3CE;
+
+	// crawling along the face perpendicular to X1
+	for (int i = 1; i <= N1; ++i) {
+		for (int j = 1; j < N2; ++j) {
+			for (int k = 1; k < N3; ++k) {
+				// geometric characteristics of the computational cell
+				// geometric factor of cylindricity
+				XLE = 1 + (L-1)*(X1[i] - 1);
+
+				// velocity components in cell centers
+				U1C = U1CON[i][j][k];
+				U1CE = U1CON[i-1][j][k];
+
+				U2C = U2CON[i][j][k];
+				U2CE = U2CON[i][j][k];
+
+				U3C = U3CON[i][j][k];
+				U3CE = U3CON[i-1][j][k];
+
+				// friction stress
+				SIGM11[i][j][k]=-VIS*XLE*(U1CE-U1C)/DX1;
+				SIGM21[i][j][k]=-VIS*XLE*(U2CE-U2C)/DX1;
+				SIGM31[i][j][k]=-VIS*XLE*(U3CE-U3C)/DX1;
+			}
+		}
+	}
+
+	double U1CN, U2CN, U3CN;
+
+	// crawling along the face perpenditcular to X2
+	for (int i = 1; i < N1; ++i) {
+		for (int j = 1; j <= N2; ++j) {
+			for (int k = 1; k < N3; ++k) {
+				// geometric characteristics of the computational cell
+				// geometric factor of cylindricity
+				XLE = 1 + (L-1)*(X1[i] - 1);
+				// geometric factor of cylindricity
+				XLW = 1 + (L-1)*(X1[i-1] - 1);
+				// geometric factor of cylindricity
+				XLT = 0.5*(XLE + XLW);
+				// geometric factor of cylindricity
+				XLN = XLT;
+
+				// velocity components in cell centers
+				U1C = U1CON[i][j][k];
+				U1CN = U1CON[i][j-1][k];
+
+				U2C = U2CON[i][j][k];
+				U2CN = U2CON[i][j-1][k];
+
+				U3C = U3CON[i][j][k];
+				U3CN = U3CON[i][j-1][k];
+
+				// friction stress
+				SIGM12[i][j][k]=-VIS*((U1CN-U1C)/DX2 -(L-1)*(U2C+U2CN))/XLN;
+				SIGM22[i][j][k]=-VIS*((U2CN-U2C)/DX2 +(L-1)*(U1C+U1CN))/XLN;
+				SIGM32[i][j][k]=-VIS*(U3CN-U3C)/DX2;
+			}
+		}
+	}
+
+	double U1CT, U2CT, U3CT;
+
+	// crawling along the face perpenditcular to X3
+	for (int i = 1; i < N1; ++i) {
+		for (int j = 1; j < N2; ++j) {
+			for (int k = 1; k <= N3; ++k) {
+				// geometric characteristics of the computational cell
+				// geometric factor of cylindricity
+				XLE = 1 + (L-1)*(X1[i] - 1);
+				// geometric factor of cylindricity
+				XLW = 1 + (L-1)*(X1[i-1] - 1);
+				// geometric factor of cylindricity
+				XLT = 0.5*(XLE + XLW);
+
+				// velocity components in the cell centers
+				U1C = U1CON[i][j][k];
+				U1CT = U1CON[i][j][k-1];
+
+				U2C = U2CON[i][j][k];
+				U2CT = U2CON[i][j][k-1];
+
+				U3C = U3CON[i][j][k];
+				U3CT = U3CON[i][j][k-1];
+
+				// friction stress
+				SIGM13[i][j][k]=-VIS*XLT*(U1CT-U1C)/DX3;
+				SIGM23[i][j][k]=-VIS*XLT*(U2CT-U2C)/DX3;
+				SIGM33[i][j][k]=-VIS*XLT*(U3CT-U3C)/DX3;
+			}
+		}
+	}
+
+	// #####################################################
+	// 				friction forces computation
+	// #####################################################
+
+	double DS1, DS2, DS3, SIGM1C, SIGM2C;
+
+	// area of the face perpendicuar to X1
+	DS1 = DX2*DX3;
+	DS2 = DX1*DX3;
+	DS3 = DX1*DX2;
+
+	for (int i = 1; i < N1; ++i) {
+		for (int j = 1; j < N2; ++j) {
+			for (int k = 1; k < N3; ++k) {
+				// geometric characteristics of the computational cell
+				// geometric factor of cylindricity
+				XLE = 1 + (L-1)*(X1[i] - 1);
+				// geometric factor of cylindricity
+				XLW = 1 + (L-1)*(X1[i-1] - 1);
+				// geometric factor of cylindricity
+				XLT = 0.5*(XLE + XLW);
+
+				SIGM1C = VIS*U1CON[i][j][k]/XLT;
+				SIGM2C = VIS*U2CON[i][j][k]/XLT;
+
+				// friction forces
+				F1[i][j][k] =
+						(SIGM11[i+1][j][k] - SIGM11[i][j][k]) * DS1 +
+						(SIGM12[i][j+1][k] - SIGM12[i][j][k]) * DS2 +
+						(SIGM13[i][j][k+1] - SIGM13[i][j][k]) * DS3 -
+						(L-1)*SIGM1C*DX1*DX2*DX3;
+
+				F2[i][j][k] =
+						(SIGM21[i+1][j][k] - SIGM21[i][j][k]) * DS1 +
+						(SIGM22[i][j+1][k] - SIGM22[i][j][k]) * DS2 +
+						(SIGM23[i][j][k+1] - SIGM23[i][j][k]) * DS3 -
+						(L-1)*SIGM2C*DX1*DX2*DX3;
+
+				F3[i][j][k] =
+						(SIGM21[i+1][j][k] - SIGM21[i][j][k]) * DS1 +
+						(SIGM22[i][j+1][k] - SIGM22[i][j][k]) * DS2 +
+						(SIGM23[i][j][k+1] - SIGM23[i][j][k]) * DS3;
+			}
+		}
+	}
 
 }
 

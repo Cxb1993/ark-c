@@ -38,18 +38,18 @@ double *X1, *X2, *X3;
 
 //	----------------------------------------------------------------------------------
 //	ROCON(:,:,:) - conservative density at the current time step
-//	U1CON(:,:,:) - conservative speed at the current time step along the axis X1
-//	U2CON(:,:,:) - conservative speed at the current time step along the axis X2
-//	U3CON(:,:,:) - conservative speed at the current time step along the axis X3
+//	U1CON(:,:,:) - conservative velocity at the current time step along the axis X1
+//	U2CON(:,:,:) - conservative velocity at the current time step along the axis X2
+//	U3CON(:,:,:) - conservative velocity at the current time step along the axis X3
 //	TCON(:,:,:) - conservative temperature at the current time step
 
 double ***ROCON, ***U1CON, ***U2CON, ***U3CON, ***TCON;
 
 //	----------------------------------------------------------------------------------
 //	RONCON(:,:,:) - conservative density on the next time step
-//	U1NCON(:,:,:) - conservative speed on the next time step along the axis X1
-//	U2NCON(:,:,:) - conservative speed on the next time step along the axis X2
-//	U3NCON(:,:,:) - conservative speed on the next time step along the axis X3
+//	U1NCON(:,:,:) - conservative velocity on the next time step along the axis X1
+//	U2NCON(:,:,:) - conservative velocity on the next time step along the axis X2
+//	U3NCON(:,:,:) - conservative velocity on the next time step along the axis X3
 //	TNCON(:,:,:) - conservative temperature at the next time step
 
 double ***RONCON, ***U1NCON, ***U2NCON, ***U3NCON, ***TNCON;
@@ -57,9 +57,9 @@ double ***RONCON, ***U1NCON, ***U2NCON, ***U3NCON, ***TNCON;
 //	----------------------------------------------------------------------------------
 //	P1(:,:,:) -  pressure on the faces perpendicular to the axis X1
 //	RO1(:,:,:) - density on the faces perpendicular to the axis X1
-//	U11(:,:,:) - speed along the axis X1 on the faces perpendicular to the axis X1
-//	U21(:,:,:) - speed along the axis X2 on the faces perpendicular to the axis X1
-//	U31(:,:,:) - speed along the axis X3 on the faces perpendicular to the axis X1
+//	U11(:,:,:) - velocity along the axis X1 on the faces perpendicular to the axis X1
+//	U21(:,:,:) - velocity along the axis X2 on the faces perpendicular to the axis X1
+//	U31(:,:,:) - velocity along the axis X3 on the faces perpendicular to the axis X1
 //	T1(:,:,:) -  temperature on the faces perpendicular to the axis X1
 
 double ***P1, ***RO1, ***U11, ***U21, ***U31, ***T1;
@@ -67,9 +67,9 @@ double ***P1, ***RO1, ***U11, ***U21, ***U31, ***T1;
 //	----------------------------------------------------------------------------------
 //	P2(:,:,:) -  pressure on the faces perpendicular to the axis X2
 //	RO2(:,:,:) - density on the faces perpendicular to the axis X2
-//	U12(:,:,:) - speed along the axis X1 on the faces perpendicular to the axis X2
-//	U22(:,:,:) - speed along the axis X2 on the faces perpendicular to the axis X2
-//	U32(:,:,:) - speed along the axis X3 on the faces perpendicular to the axis X2
+//	U12(:,:,:) - velocity along the axis X1 on the faces perpendicular to the axis X2
+//	U22(:,:,:) - velocity along the axis X2 on the faces perpendicular to the axis X2
+//	U32(:,:,:) - velocity along the axis X3 on the faces perpendicular to the axis X2
 //	T2(:,:,:) -  temperature on the faces perpendicular to the axis X2
 
 double ***P2, ***RO2, ***U12, ***U22, ***U32, ***T2;
@@ -77,9 +77,9 @@ double ***P2, ***RO2, ***U12, ***U22, ***U32, ***T2;
 //	----------------------------------------------------------------------------------
 //	P3(:,:,:) -  pressure on the faces perpendicular to the axis X3
 //	RO3(:,:,:) - density on the faces perpendicular to the axis X3
-//	U13(:,:,:) - speed along the axis X1 on the faces perpendicular to the axis X3
-//	U23(:,:,:) - speed along the axis X2 on the faces perpendicular to the axis X3
-//	U33(:,:,:) - speed along the axis X3 on the faces perpendicular to the axis X3
+//	U13(:,:,:) - velocity along the axis X1 on the faces perpendicular to the axis X3
+//	U23(:,:,:) - velocity along the axis X2 on the faces perpendicular to the axis X3
+//	U33(:,:,:) - velocity along the axis X3 on the faces perpendicular to the axis X3
 //	T3(:,:,:) -  temperature on the faces perpendicular to the axis X3
 
 double ***P3, ***RO3, ***U13, ***U23, ***U33, ***T3;
