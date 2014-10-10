@@ -452,5 +452,8 @@ void deallocate3D(double*** arr, int n1, int n2)
 		for (int j = 0; j <= n2; ++j) {
 			free(arr[i][j]);
 		}
+		free(arr[i]);
 	}
+	free(arr);
+	arr = NULL;
 }
