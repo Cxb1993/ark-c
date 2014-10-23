@@ -65,19 +65,19 @@ void Input()
 	// number of grid nodes along the X3 axis to 1 processor
 	N3 = N3G/1;
 
-	// coordinates of west border
+	// coordinates of west plane
 	X1W = 0.15;
-	// coordinates of east border
+	// coordinates of east plane
 	X1E = 0.25;
 
-	// coordinates of south border
+	// coordinates of south plane
 	X2S = 0.0;
-	// coordinates of north border
+	// coordinates of north plane
 	X2N = 2.0 * PI;
 
-	// coordinates of bottom border
+	// coordinates of bottom plane
 	X3B = 0.0;
-	// coordinates of top border
+	// coordinates of top plane
 	X3T = 1.0;
 
 	// total number of steps
@@ -102,15 +102,15 @@ void Input()
 	// sound velocity
 	SOUND=10.;
 
-	// pressure on the top border
+	// pressure on the top plane
 	POUTLET=0;
-	// velocity on the bottom border along the X3 axis
+	// velocity on the bottom plane along the X3 axis
 	U3INLET=U30;
-	// velocity on the bottom border along the X2 axis
+	// velocity on the bottom plane along the X2 axis
 	U2INLET=U20;
-	// velocity on the bottom border along the X1 axis
+	// velocity on the bottom plane along the X1 axis
 	U1INLET=U10;
-	// temperature on the bottom border
+	// temperature on the bottom plane
 	TINLET=T0;
 	// unperturbed density of the liquid
 	RO0G=1.;
@@ -325,7 +325,204 @@ void TimeStepSize()
 
 void Phase1()
 {
+	// 
+	for (int i = 1; i < N1; i++)
+	{
+		for (int j = 1; j < N2; j++)
+		{
+			for (int k = 1; k < N3; k++)
+			{
+				U1CON[i][j][k] = U1NCON[i][j][k];
+				U1CON[i][j][k] = U1NCON[i][j][k];
+				U1CON[i][j][k] = U1NCON[i][j][k];
+				ROCON[i][j][k] = RONCON[i][j][k];
+				TCON[i][j][k] = TNCON[i][j][k];
+			}
+		}
+	}
 
+	double DS1, DS2, DS3, DVC, XLE, XLW, XLT, XLB, ALFA;
+
+			// velocity, density, temperature and pressure on the eastern plane
+	double	U1E, U2E, U3E, ROE, TE, PE,
+			// velocity, density , temperature and pressure on the western plane
+			U1W, U2W, U3W, ROW, TW, PW,
+			// velocity, density , temperature and pressure on the northern plane
+			U1N, U2N, U3N, RON, TN, PN,
+			// velocity, density , temperature and pressure on the southern plane
+			U1S, U2S, U3S, ROS, TS, PS,
+			// velocity, density , temperature and pressure on the top plane
+			U1T, U2T, U3T, ROT, TT, PT,
+			// velocity, density , temperature and pressure on the bottom plane
+			U1B, U2B, U3B, ROB, TB, PB,
+			// velocity, density and temperature in the cell center
+			U1C, U2C, U3C, ROC, TC,
+			// velocity, density and temperature in the cell center on the next time step
+			U1CN, U2CN, U3CN, ROCN, TCN;
+
+	// plane squares
+	DS1 = DX2*DX3;
+	DS2 = DX1*DX3; 
+	DS3 = DX1*DX2;
+
+	for (int i = 1; i < N1; i++)
+	{
+		for (int j = 1; j < N2; j++)
+		{
+			for (int k = 1; k < N3; k++)
+			{
+				// geometric characteristics of the computational cell
+				// geometric factor of cylindricity
+				XLE = 1 + (L - 1)*(X1[i] - 1);
+				// geometric factor of cylindricity
+				XLW = 1 + (L - 1)*(X1[i - 1] - 1);
+				// geometric factor of cylindricity
+				XLT = 0.5*(XLE + XLW);
+				// geometric factor of cylindricity
+				XLB = XLT;
+				// cell volume
+				DVC = 0.5*(XLE + XLW)*DX1*DX2*DX3;
+				// geometric parameter
+				ALFA = DT*(L - 1)*DX1*DX2*DX3 / (2 * DVC);
+
+				// #########################################################
+				//	get velocity, density , temperature and pressure values
+				// #########################################################
+
+				// east plane
+				U1E = U11[i + 1][j][k];
+				U2E = U21[i + 1][j][k];
+				U3E = U31[i + 1][j][k];
+				ROE = RO1[i + 1][j][k];
+				TE = T1[i + 1][j][k];
+				PE = P1[i + 1][j][k];
+				// west plane
+				U1W = U11[i][j][k];
+				U2W = U21[i][j][k];
+				U3W = U31[i][j][k];
+				ROW = RO1[i][j][k];
+				TW = T1[i][j][k];
+				PW = P1[i][j][k];
+
+				// north plane
+				U1N = U12[i][j + 1][k];
+				U2N = U22[i][j + 1][k];
+				U3N = U32[i][j + 1][k];
+				RON = RO2[i][j + 1][k];
+				TN = T2[i][j + 1][k];
+				PN = P2[i][j + 1][k];
+				// south plane
+				U1W = U12[i][j][k];
+				U2W = U22[i][j][k];
+				U3W = U32[i][j][k];
+				ROW = RO2[i][j][k];
+				TS = T2[i][j][k];
+				PS = P2[i][j][k];
+
+				// top plane
+				U1T = U13[i][j][k + 1];
+				U2T = U23[i][j][k + 1];
+				U3T = U33[i][j][k + 1];
+				ROT = RO3[i][j][k + 1];
+				TT = T3[i][j][k + 1];
+				PT = P3[i][j][k + 1];
+				// bottom plane
+				U1B = U13[i][j][k];
+				U2B = U23[i][j][k];
+				U3B = U33[i][j][k];
+				ROB = RO3[i][j][k];
+				TB = T3[i][j][k];
+				PB = P3[i][j][k];
+
+				// cell center
+				U1C = U1CON[i][j][k];
+				U2C = U2CON[i][j][k];
+				U3C = U3CON[i][j][k];
+				ROC = ROCON[i][j][k];
+				TC = TCON[i][j][k];
+				
+				// #####################################################
+				//					new values evaluating
+				// #####################################################
+
+				// new density
+				ROCN = (ROC*DVC - 0.5*DT*((XLE*ROE*U1E - XLW*ROW*U1W)*DS1 +
+					(RON*U2N - ROS*U2S)*DS2 + (XLT*ROT*U3T - XLB*ROB*U3B)*DS3)) / DVC;
+				
+				// new conservative velocity along the X1 axis
+				double U1CP = (ROC*U1C*DVC - 0.5*DT*((RON*U2N*U1N - ROS*U2S*U1S)*DS2 +
+					(XLT*ROT*U3T*U1T - XLB*ROB*U3B*U1B)*DS3 +
+					(XLE*(ROE*U1E*ROE*U1E + PE) - XLW*(ROW*U1W*ROW*U1W + PW))*DS1
+					- 0.5*(L - 1)*(PE + PW)*DX1*DX2*DX3)) / (DVC*ROCN);
+				// new conservative velocity along the X2 axis
+				double U2CP = U2CP = (ROC*U2C*DVC - 0.5*DT*((XLE*ROE*U1E*U2E - XLW*ROW*U1W*U2W)*DS1 +
+					((RON*U2N*RON*U2N + PN) - (ROS*U2S*ROS*U2S + PS))*DS2 +
+					(XLT*ROT*U3T*U2T - XLB*ROB*U3B*U2B)*DS3)) / (DVC*ROCN);
+
+				// take into account of centrifugal and Coriolis forces
+				U1CN = (U1CP - ALFA*U2C*U1CP) / (1 + (ALFA*U2C)*(ALFA*U2C));
+				U2CN = U2CP - ALFA*U2C*U1CN;
+
+				// new conservative velocity along the X3 axis
+				U3CN = (ROC*U3C*DVC - 0.5*DT*((XLE*ROE*U1E*U3E - XLW*ROW*U1W*U3W)*DS1 +
+					(RON*U2N*U3N - ROS*U2S*U3S)*DS2 +
+					(XLT*(ROT*U3T*ROT*U3T + PT) - XLB*(ROB*U3B*ROB*U3B + PB))*DS3)) / (DVC*ROCN);
+
+				// new temperature
+				TCN = (ROC*TC*DVC - 0.5*DT*((XLE*ROE*TE*U1E - XLW*ROW*TW*U1W)*DS1 +
+					(RON*TN*U2N - ROS*TS*U2S)*DS2 +
+					(XLT*ROT*TT*U3T - XLB*ROB*TB*U3B)*DS3)) / (DVC*ROCN);
+
+				// finally
+				U1NCON[i][j][k] = U1CN;
+				U2NCON[i][j][k] = U2CN;
+				U3NCON[i][j][k] = U3CN;
+				RONCON[i][j][k] = ROCN;
+				TNCON[i][j][k] = TCN;
+			}
+		}
+	}
+
+	// periodicity conditions
+	for (int i = 1; i <= N1; ++i)
+	{
+		for (int k = 1; k <= N3; ++k)
+		{
+			// periodicity condition on the north plane
+			U1NCON[i][N2][k] = U1NCON[i][1][k];
+			U2NCON[i][N2][k] = U2NCON[i][1][k];
+			U3NCON[i][N2][k] = U3NCON[i][1][k];
+			RONCON[i][N2][k] = RONCON[i][1][k];
+			TNCON[i][N2][k] = TNCON[i][1][k];
+			// periodicity condition on the south plane
+			U1NCON[i][0][k] = U1NCON[i][N2 - 1][k];
+			U2NCON[i][0][k] = U2NCON[i][N2 - 1][k];
+			U3NCON[i][0][k] = U3NCON[i][N2 - 1][k];
+			RONCON[i][0][k] = RONCON[i][N2 - 1][k];
+			TNCON[i][0][k] = TNCON[i][N2 - 1][k];
+		}
+	}	
+
+	// no-slip conditions
+	for (int j = 1; j < N2; ++j)
+	{
+		for (int k = 1; k < N3; ++k)
+		{
+			// no-slip consition on the west plane
+			U1NCON[0][j][k] = 0.;
+			U2NCON[0][j][k] = 0.;
+			U3NCON[0][j][k] = 0.;
+			RONCON[0][j][k] = RONCON[1][j][k];
+			TNCON[0][j][k] = T0;
+
+			// no-slip consition on the east plane
+			U1NCON[N1][j][k] = 0.;
+			U2NCON[N1][j][k] = 0.;
+			U3NCON[N1][j][k] = 0.;
+			RONCON[N1][j][k] = RONCON[N1 - 1][j][k];
+			TNCON[N1][j][k] = T0;
+		}
+	}
 }
 
 void Phase2()
