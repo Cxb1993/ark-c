@@ -552,7 +552,7 @@ void Phase2()
 	// bypassing along the X1 axis
 
 	// only interior faces !
-	for (int k = 1; k < N1; k++)
+	for (int k = 1; k < N3; k++)
 	{
 		for (int j = 1; j < N2; j++)
 		{
@@ -866,8 +866,8 @@ void Phase2()
 				U1CN = U1NCON[i][j][k];
 				U1C = U1CON[i][j][k];
 
-				U3F = U31[i][j + 1][k];
-				U3B = U31[i][j][k];
+				U3F = U32[i][j + 1][k];
+				U3B = U32[i][j][k];
 				U3CN = U3NCON[i][j][k];
 				U3C = U3CON[i][j][k];
 
@@ -1098,7 +1098,7 @@ void Phase2()
 	{
 		for (int i = 1; i < N1; i++)
 		{
-			for (int k = 0; k <= N3; k++)
+			for (int k = 1; k < N3; k++)
 			{
 				U3F = U33[i][j][k + 1];
 				U3B = U33[i][j][k];
@@ -1622,12 +1622,12 @@ void FreeMemory()
 	deallocate3D(U32, N1, N2+1);
 	deallocate3D(P2, N1, N2+1);
 
-	deallocate3D(RO1, N1, N2);
-	deallocate3D(T1, N1, N2);
-	deallocate3D(U11, N1, N2);
-	deallocate3D(U21, N1, N2);
-	deallocate3D(U31, N1, N2);
-	deallocate3D(P1, N1, N2);
+	deallocate3D(RO3, N1, N2);
+	deallocate3D(T3, N1, N2);
+	deallocate3D(U13, N1, N2);
+	deallocate3D(U23, N1, N2);
+	deallocate3D(U33, N1, N2);
+	deallocate3D(P3, N1, N2);
 
 	deallocate3D(F1, N1, N2);
 	deallocate3D(F2, N1, N2);
