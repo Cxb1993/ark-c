@@ -527,10 +527,6 @@ void Phase1()
 
 void Phase2()
 {
-	// flow variables calculation on DS1 faces orthogonal X1 axis 
-
-	// bypassing along the X1 axis
-
 	double U1F, U1B, U1CN, U1C,
 		U2F, U2FN, U2B, U2BN, U2CN, U2C,
 		U3F, U3FN, U3B, U3BN, U3CN, U3C,
@@ -550,6 +546,10 @@ void Phase2()
 	// first local invariants for the interior faces puts in the buffer arrays, bypass on the center of the cell
 	// then by taking into account the boundary condition calculates extreme elements of the buffers
 	// and only then calculates the flow variables
+
+	// flow variables calculation on DS1 faces orthogonal X1 axis 
+
+	// bypassing along the X1 axis
 
 	// only interior faces !
 	for (int k = 1; k < N1; k++)
@@ -614,7 +614,6 @@ void Phase2()
 				U3BN = 2 * U3CN - U3F;
 
 				// the permissible range of changes
-
 				GR = 2 * (RCN - RC) / DT + (U1CN + SOUND)*(RF - RB) / DX1;
 				GQ = 2 * (RCN - RC) / DT + (U1CN - SOUND)*(QF - QB) / DX1;
 
@@ -763,6 +762,7 @@ void Phase2()
 			U21[N1][j][k] = U2N;
 			U31[N1][j][k] = U3N;
 
+			// the flow variables calculations
 			for (int i = 2; i < N1; i++)
 			{
 				RO0B = RONCON[i - 1][j][k];
@@ -831,6 +831,262 @@ void Phase2()
 			T1[1][j][k] = T1[N1][j][k];
 			U21[1][j][k] = U21[N1][j][k];
 			U31[1][j][k] = U31[N1][j][k];
+		}
+	}
+
+	// flow variables calculation on DS2 faces orthogonal X2 axis 
+
+	// bypassing along the X2 axis
+
+	double XLE, XLW, XLS;
+
+	double U1FN, U1BN;
+
+	double GU1;
+
+	double U1MAX, U1MIN, U1N;
+
+	for (int k = 1; k < N3; k++)
+	{
+		for (int i = 1; i < N1; i++)
+		{
+			XLE = 1 + (L - 1)*(X1[i + 1] - 1);
+			XLW = 1 + (L - 1)*(X1[i] - 1);
+			XLS = 0.5*(XLE + XLW);
+			
+			for (int j = 0; j <= N2; j++)
+			{
+				U2F = U22[i][j + 1][k];
+				U2B = U22[i][j][k];
+				U2CN = U2NCON[i][j][k];
+				U2C = U2CON[i][j][k];
+
+				U1F = U12[i][j + 1][k];
+				U1B = U12[i][j][k];
+				U1CN = U1NCON[i][j][k];
+				U1C = U1CON[i][j][k];
+
+				U3F = U31[i][j + 1][k];
+				U3B = U31[i][j][k];
+				U3CN = U3NCON[i][j][k];
+				U3C = U3CON[i][j][k];
+
+				ROF = RO2[i][j + 1][k];
+				ROB = RO2[i][j][k];
+				ROCN = RONCON[i][j][k];
+				ROC = ROCON[i][j][k];
+
+				TF = T2[i][j + 1][k];
+				TB = T2[i][j][k];
+				TCN = TNCON[i][j][k];
+				TC = TCON[i][j][k];
+
+				PF = P2[i][j + 1][k];
+				PB = P2[i][j][k];
+				PCN = SOUND*SOUND*(ROCN - RO0G);
+				PC = SOUND*SOUND*(ROC - RO0G);
+
+				// invariant calculation
+				RF = U2F + PF / (RO0G*SOUND);
+				RB = U2B + PB / (RO0G*SOUND);
+				RCN = U2CN + PCN / (RO0G*SOUND);
+				RC = U2C + PC / (RO0G*SOUND);
+
+				RFN = 2 * RCN - RB;
+
+				QF = U2F - PF / (RO0G*SOUND);
+				QB = U2B - PB / (RO0G*SOUND);
+				QCN = U2CN - PCN / (RO0G*SOUND);
+				QC = U2C - PC / (RO0G*SOUND);
+
+				QBN = 2 * QCN - QF;
+
+				TFN = 2 * TCN - TB;
+				TBN = 2 * TCN - TF;
+
+				U1FN = 2 * U1CN - U1B;
+				U1BN = 2 * U1CN - U1F;
+
+				U3FN = 2 * U3CN - U3B;
+				U3BN = 2 * U3CN - U3F;
+
+				// the permissible range of changes
+				GR = 2 * (RCN - RC) / DT + (U2CN + SOUND)*(RF - RB) / DX2 / XLS;
+				GQ = 2 * (QCN - QC) / DT + (U2CN - SOUND)*(QF - QB) / DX2 / XLS;
+				GT = 2 * (TCN - TC) / DT + U2CN*(TF - TB) / DX2 / XLS;
+				GU1 = 2 * (U1CN - U1C) / DT + U2CN*(U1F - U1B) / DX2 / XLS;
+				GU3 = 2 * (U3CN - U3C) / DT + U2CN*(U3F - U3B) / DX2 / XLS;
+
+				// RMAX=MAX(RF,RC,RB) +DT*GR
+				RMAX = RF > RC ? RF : RC;
+				RMAX = RMAX > RB ? RMAX : RB;
+				RMAX += DT*GR;
+
+				// RMIN=MIN(RF,RC,RB) +DT*GR
+				RMIN = RF < RC ? RF : RC;
+				RMIN = RMIN < RB ? RMIN : RB;
+				RMIN += DT*GR;
+
+				// QMAX=MAX(QF,QC,QB) +DT*GQ
+				QMAX = QF > QC ? QF : QC;
+				QMAX = QMAX > QB ? QMAX : QB;
+				QMAX += DT*GQ;
+
+				// QMIN=MIN(QF,QC,QB) +DT*GQ
+				QMIN = QF < QC ? QF : QC;
+				QMIN = QMIN < QB ? QMIN : QB;
+				QMIN += DT*GQ;
+
+				// TMAX=MAX(TF,TC,TB) +DT*GT
+				TMAX = TF > TC ? TF : TC;
+				TMAX = TMAX > TB ? TMAX : TB;
+				TMAX += DT*GT;
+
+				// TMIN=MIN(TF,TC,TB) +DT*GT
+				TMIN = TF < TC ? TF : TC;
+				TMIN = TMIN < TB ? TMIN : TB;
+				TMIN += DT*GT;
+
+				// U1MAX=MAX(U1F,U1C,U1B) +DT*GU1
+				U1MAX = U1F > U1C ? U1F : U1C;
+				U1MAX = U1MAX > U1B ? U1MAX : U1B;
+				U1MAX += DT*GU1;
+
+				// U1MIN=MIN(U1F,U1C,U1B) +DT*GU1
+				U1MIN = U1F < U1C ? U1F : U1C;
+				U1MIN = U1MIN < U1B ? U1MIN : U1B;
+				U1MIN += DT*GU1;
+
+				// U3MAX=MAX(U3F,U3C,U3B) +DT*GU3
+				U3MAX = U3F > U3C ? U3F : U3C;
+				U3MAX = U3MAX > U3B ? U3MAX : U3B;
+				U3MAX += DT*GU3;
+
+				// U3MIN=MIN(U3F,U3C,U3B) +DT*GU3 
+				U3MIN = U3F < U3C ? U3F : U3C;
+				U3MIN = U3MIN < U3B ? U3MIN : U3B;
+				U3MIN += DT*GU3;
+
+				// invariants correction
+				if (RFN > RMAX) RFN = RMAX;
+				if (RFN < RMIN) RFN = RMIN;
+
+				if (QBN > QMAX) QBN = QMAX;
+				if (QBN < QMIN) QBN = QMIN;
+
+				if (TFN > TMAX) TFN = TMAX;
+				if (TFN < TMIN) TFN = TMIN;
+
+				if (TBN > TMAX) TBN = TMAX;
+				if (TBN < TMIN) TBN = TMIN;
+
+				if (U1FN > U1MAX) U1FN = U1MAX;
+				if (U1FN < U1MIN) U1FN = U1MIN;
+
+				if (U1BN > U1MAX) U1BN = U1MAX;
+				if (U1BN < U1MIN) U1BN = U1MIN;
+
+				if (U3FN > U3MAX) U3FN = U3MAX;
+				if (U3FN < U3MIN) U3FN = U3MIN;
+
+				if (U3BN > U3MAX) U3BN = U3MAX;
+				if (U3BN < U3MIN) U3BN = U3MIN;
+
+				// put invariants to buffers
+				RBUF[j + 1] = RFN;
+				QBUF[j] = QBN;
+				TFBUF[j + 1] = TFN;
+				TBBUF[j] = TBN;
+				U2FBUF[j + 1] = U1FN;
+				U2BBUF[j] = U1BN;
+				U3FBUF[j + 1] = U3FN;
+				U3BBUF[j] = U3BN;
+			}
+
+			// boundary conditions along the X2 axis
+			// assignment of boundary invatiants and add them to the buffer arrays
+
+			// periodicity conditions
+			RBUF[1] = RBUF[N1];
+			TFBUF[1] = TFBUF[N1];
+			U2FBUF[1] = U2FBUF[N1];
+			U3FBUF[1] = U3FBUF[N1];
+
+			// periodicity conditions
+			QBUF[N2] = QBUF[1];
+			TBBUF[N2] = TBBUF[1];
+			U2BBUF[N2] = U2BBUF[1];
+			U3BBUF[N2] = U3BBUF[1];
+
+			// the flow variables calculations
+			for (int j = 1; j <= N2; j++)
+			{
+				RO0B = RONCON[i][j - 1][k];
+				RO0F = RONCON[i][j][k];
+
+				RN = RBUF[j];
+				QN = QBUF[j];
+
+				PN = (RN - QN)*SOUND*RO0G / 2;
+				UN = (RN + QN) / 2;
+
+				RON = (RO0G + PN / (SOUND*SOUND));
+
+				UCF = U2NCON[i][j][k];
+				UCB = U2NCON[i][j - 1][k];
+
+				if (UCF >= 0 && UCB > 0)
+				{
+					TN = TFBUF[j];
+					U1N = U2FBUF[j];
+					U3N = U3FBUF[j];
+				}
+				else if (UCF <= 0 && UCB <= 0)
+				{
+					TN = TBBUF[j];
+					U1N = U2BBUF[j];
+					U3N = U3BBUF[j];
+				}
+				else if (UCB >= 0 && UCF <= 0)
+				{
+					if (UCB > -UCF)
+					{
+						TN = TFBUF[j];
+						U1N = U2FBUF[j];
+						U3N = U3FBUF[j];
+					}
+					else
+					{
+						TN = TBBUF[j];
+						U1N = U2BBUF[j];
+						U3N = U3BBUF[j];
+					}
+				}
+				else
+				{
+					if (UCB <= 0 && UCF >= 0)
+					{
+						TN = TNCON[i][j][k] + TNCON[i - 1][j][k] - T2[i][j][k];
+						U1N = U1NCON[i][j][k] + U1NCON[i - 1][j][k] - U12[i][j][k];
+						U3N = U3NCON[i][j][k] + U3NCON[i - 1][j][k] - U32[i][j][k];
+					}
+				}
+
+				P2[i][j][k] = PN;
+				U22[i][j][k] = UN;
+				RO2[i][j][k] = RON;
+				T2[i][j][k] = TN;
+				U12[i][j][k] = U1N;
+				U32[i][j][k] = U3N;
+			}
+
+			// the flow variable calculations on the south border
+			P2[i][1][k] = P2[i][N2][k];
+			U22[i][1][k] = U22[i][N2][k];
+			RO2[i][1][k] = RO2[i][N2][k];
+			T2[i][1][k] = T2[i][N2][k];
+			U12[i][1][k] = U12[i][N2][k];
+			U32[i][1][k] = U32[i][N2][k];
 		}
 	}
 }
