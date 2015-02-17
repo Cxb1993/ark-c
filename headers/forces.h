@@ -3,10 +3,10 @@
 #define _FORCES_H
 
 //	---------------------------------------------------------------------------------------
-//	F1(:,:,:) - force (friction, etc.) along the axis X1
-//	F2(:,:,:) - force (friction, etc.) along the axis X2
-//	F3(:,:,:) - force (friction, etc.) along the axis X3
+//	f1(:,:,:) - force (friction, etc.) along the axis x1
+//	f2(:,:,:) - force (friction, etc.) along the axis X2
+//	f3(:,:,:) - force (friction, etc.) along the axis X3
 
-double ***F1, ***F2, ***F3;
+double ***f1, ***f2, ***f3;
 
 #endif

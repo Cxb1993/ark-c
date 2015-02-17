@@ -14,6 +14,7 @@ void Phase2();
 void StressTensor();
 void UseForces();
 void WriteData();
+void WriteDataParaView();
 void FreeMemory();
 
 double ***allocate3D(int, int, int);
@@ -24,24 +25,24 @@ int main (int argc, char** argv)
 	Input();
 	InitializeData();
 
-	NSTEP = 0;
+	nStep = 0;
 	TIME = 0.0;
-	do {
+	do 
+	{
 		TimeStepSize();
-		NSTEP++;
-		TIME += 0.5*DT;
+		nStep++;
+		TIME += 0.5*dt;
 		Phase1();
 		StressTensor();
 		UseForces();
 		Phase2();
 		Phase1();
 		UseForces();
-		TIME += 0.5*DT;
+		TIME += 0.5*dt;
 
-		if (NSTEP % NPRINT == 0) WriteData();
-		printf("step: %d dt:%f\n", NSTEP, DT);
-	} while (NSTEP < NSTOP);
-
+		if (nStep % nPrint == 0) WriteDataParaView();
+		printf("step: %d dt:%E\n", nStep, dt);
+	} while (nStep < nStop);
 	FreeMemory();
     return 0;
 }
@@ -49,152 +50,152 @@ int main (int argc, char** argv)
 void Input()
 {
 	// geometry index
-	L = 1;
+	l = 1;
 
-	// total number of grid nodes along the X1 axis
-	N1G = 32;
+	// total number of grid nodes along the x1 axis
+	n1_g = 16;
 	// total number of grid nodes along the X2 axis
-	N2G = 32;
+	n2_g = 16;
 	// total number of grid nodes along the X3 axis
-	N3G = 64;
+	n3_g = 32;
 
-	// number of grid nodes along the X1 axis to 1 processor
-	N1 = N1G/1;
+	// number of grid nodes along the x1 axis to 1 processor
+	n1 = n1_g/1;
 	// number of grid nodes along the X2 axis to 1 processor
-	N2 = N2G/1;
+	n2 = n2_g/1;
 	// number of grid nodes along the X3 axis to 1 processor
-	N3 = N3G/1;
+	n3 = n3_g/1;
 
 	// coordinates of west plane
-	X1W = 0.15;
+	x1_w = 0.;
 	// coordinates of east plane
-	X1E = 0.25;
+	x1_e = 2.;
 
 	// coordinates of south plane
-	X2S = 0.0;
+	x2_s = 0.;
 	// coordinates of north plane
-	X2N = 2.0 * PI;
+	x2_n = 2. * PI;
 
 	// coordinates of bottom plane
-	X3B = 0.0;
+	x3_b = 0.;
 	// coordinates of top plane
-	X3T = 1.0;
+	x3_t = 4. * PI;
 
 	// total number of steps
-	NSTOP = 100;
+	nStop = 100;
 	// print interval
-	NPRINT = 100;
+	nPrint = 100;
 
 	// Courant number
 	CFL = 0.2;
 
 	// kinematic viscosity
-	VIS=0.5/50.;  // 0.5
+	VIS = 0.5/50.;  // 0.5
 	// initial temperature
-	T0=1.;
+	t0 = 1.;
 
-	// initial velocity along the X1 axis
-	U10=0.;
+	// initial velocity along the x1 axis
+	u10 = 0.;
 	// initial velocity along the X2 axis
-	U20=0.;
+	u20 = 0.;
 	// initial velocity along the X3 axis
-	U30=1.;
+	u30 = 1.;
 	// sound velocity
-	SOUND=10.;
+	sound = 10.;
 
 	// pressure on the top plane
-	POUTLET=0;
+	pOutlet = 0;
 	// velocity on the bottom plane along the X3 axis
-	U3INLET=U30;
+	u3Inlet = u30;
 	// velocity on the bottom plane along the X2 axis
-	U2INLET=U20;
-	// velocity on the bottom plane along the X1 axis
-	U1INLET=U10;
+	u2Inlet = u20;
+	// velocity on the bottom plane along the x1 axis
+	u1Inlet = u10;
 	// temperature on the bottom plane
-	TINLET=T0;
+	tInlet = t0;
 	// unperturbed density of the liquid
-	RO0G=1.;
+	ro0_g = 1.;
 	// unperturbed density of the borders material
-	RO0S=100000000.;
+	ro0_s = 100000000.;
 
 	// #####################################################
 	// 				block of arrays allocation
 	// #####################################################
 
 	// coordinates of grid nodes along the all of the axises
-	X1 = calloc((size_t) (N1+2), sizeof(double));
-	X2 = calloc((size_t) (N2+2), sizeof(double));
-	X3 = calloc((size_t) (N3+2), sizeof(double));
+	x1 = calloc(n1+2, sizeof(double));
+	x2 = calloc(n2+2, sizeof(double));
+	x3 = calloc(n3+2, sizeof(double));
 
 	// variables on the current time step
-	ROCON	= allocate3D(N1, N2, N3);
-	TCON	= allocate3D(N1, N2, N3);
-	U1CON	= allocate3D(N1, N2, N3);
-	U2CON	= allocate3D(N1, N2, N3);
-	U3CON	= allocate3D(N1, N2, N3);
+	roCon	= allocate3D(n1, n2, n3);
+	tCon	= allocate3D(n1, n2, n3);
+	u1Con	= allocate3D(n1, n2, n3);
+	u2Con	= allocate3D(n1, n2, n3);
+	u3Con	= allocate3D(n1, n2, n3);
 
 	// variables on the next time step
-	RONCON	= allocate3D(N1, N3, N3);
-	TNCON	= allocate3D(N1, N2, N3);
-	U1NCON	= allocate3D(N1, N2, N3);
-	U2NCON	= allocate3D(N1, N2, N3);
-	U3NCON	= allocate3D(N1, N2, N3);
+	ronCon	= allocate3D(n1, n3, n3);
+	tnCon	= allocate3D(n1, n2, n3);
+	u1nCon	= allocate3D(n1, n2, n3);
+	u2nCon	= allocate3D(n1, n2, n3);
+	u3nCon	= allocate3D(n1, n2, n3);
 
-	// variables perpendicular to the axis X1
-	RO1	= allocate3D(N1+1, N2, N3);
-	T1	= allocate3D(N1+1, N2, N3);
-	U11	= allocate3D(N1+1, N2, N3);
-	U21	= allocate3D(N1+1, N2, N3);
-	U31	= allocate3D(N1+1, N2, N3);
-	P1	= allocate3D(N1+1, N2, N3);
+	// variables perpendicular to the axis x1
+	ro1	= allocate3D(n1+1, n2, n3);
+	t1	= allocate3D(n1+1, n2, n3);
+	u11	= allocate3D(n1+1, n2, n3);
+	u21	= allocate3D(n1+1, n2, n3);
+	u31	= allocate3D(n1+1, n2, n3);
+	p1	= allocate3D(n1+1, n2, n3);
 
 	// variables perpendicular to the axis X2
-	RO2	= allocate3D(N1, N2+1, N3);
-	T2	= allocate3D(N1, N2+1, N3);
-	U12	= allocate3D(N1, N2+1, N3);
-	U22	= allocate3D(N1, N2+1, N3);
-	U32	= allocate3D(N1, N2+1, N3);
-	P2	= allocate3D(N1, N2+1, N3);
+	ro2	= allocate3D(n1, n2+1, n3);
+	t2	= allocate3D(n1, n2+1, n3);
+	u12	= allocate3D(n1, n2+1, n3);
+	u22	= allocate3D(n1, n2+1, n3);
+	u32	= allocate3D(n1, n2+1, n3);
+	p2	= allocate3D(n1, n2+1, n3);
 
 	// variables perpendicular to the axis X3
-	RO3	= allocate3D(N1, N2, N3+1);
-	T3	= allocate3D(N1, N2, N3+1);
-	U13	= allocate3D(N1, N2, N3+1);
-	U23	= allocate3D(N1, N2, N3+1);
-	U33	= allocate3D(N1, N2, N3+1);
-	P3	= allocate3D(N1, N2, N3+1);
+	ro3	= allocate3D(n1, n2, n3+1);
+	t3	= allocate3D(n1, n2, n3+1);
+	u13	= allocate3D(n1, n2, n3+1);
+	u23	= allocate3D(n1, n2, n3+1);
+	u33	= allocate3D(n1, n2, n3+1);
+	p3	= allocate3D(n1, n2, n3+1);
 
 	// forces
-	F1 = allocate3D(N1, N2, N3);
-	F2 = allocate3D(N1, N2, N3);
-	F3 = allocate3D(N1, N2, N3);
+	f1 = allocate3D(n1, n2, n3);
+	f2 = allocate3D(n1, n2, n3);
+	f3 = allocate3D(n1, n2, n3);
 
-	// get into NMAX maxim of N1, N2, N3
-	int NMAX = (N1 > N2 ? N1 : N2);
-	NMAX = NMAX > N3 ? NMAX : N3;
+	// get into NMAX maxim of n1, n2, n3
+	int nmax = (n1 > n2 ? n1 : n2);
+	nmax = nmax > n3 ? nmax : n3;
 
 	// additional buffers for phase 2
-	RBUF	= calloc((size_t) (NMAX+2), sizeof(double));
-	QBUF	= calloc((size_t) (NMAX+1), sizeof(double));
-	TFBUF	= calloc((size_t) (NMAX+2), sizeof(double));
-	TBBUF	= calloc((size_t) (NMAX+2), sizeof(double));
-	U2FBUF	= calloc((size_t) (NMAX+2), sizeof(double));
-	U2BBUF	= calloc((size_t) (NMAX+2), sizeof(double));
-	U3FBUF	= calloc((size_t) (NMAX+2), sizeof(double));
-	U3BBUF	= calloc((size_t) (NMAX+2), sizeof(double));
+	rBuf	= calloc((nmax+2), sizeof(double));
+	qBuf	= calloc((nmax+1), sizeof(double));
+	tfBuf	= calloc((nmax+2), sizeof(double));
+	tbBuf	= calloc((nmax+2), sizeof(double));
+	u2fBuf	= calloc((nmax+2), sizeof(double));
+	u2bBuf	= calloc((nmax+2), sizeof(double));
+	u3fBuf	= calloc((nmax+2), sizeof(double));
+	u3bBuf	= calloc((nmax+2), sizeof(double));
 
 	// friction stress
-	SIGM11 = allocate3D(N1, N2, N3);
-	SIGM21 = allocate3D(N1, N2, N3);
-	SIGM31 = allocate3D(N1, N2, N3);
+	sigm11 = allocate3D(n1, n2, n3);
+	sigm21 = allocate3D(n1, n2, n3);
+	sigm31 = allocate3D(n1, n2, n3);
 
-	SIGM12 = allocate3D(N1, N2, N3);
-	SIGM22 = allocate3D(N1, N2, N3);
-	SIGM32 = allocate3D(N1, N2, N3);
+	sigm12 = allocate3D(n1, n2, n3);
+	sigm22 = allocate3D(n1, n2, n3);
+	sigm32 = allocate3D(n1, n2, n3);
 
-	SIGM13 = allocate3D(N1, N2, N3);
-	SIGM23 = allocate3D(N1, N2, N3);
-	SIGM33 = allocate3D(N1, N2, N3);
+	sigm13 = allocate3D(n1, n2, n3);
+	sigm23 = allocate3D(n1, n2, n3);
+	sigm33 = allocate3D(n1, n2, n3);
 }
 
 void InitializeData()
@@ -203,81 +204,78 @@ void InitializeData()
 //			BETA = 0.3,
 //			R0 = 0.05;
 
-	// init value of time step
-	DT = pow(10, -4);
+	// grid step along the x1 axis
+	dx1=(x1_e-x1_w)/(n1-1);
+	dx2=(x2_n-x2_s)/(n2-1);
+	dx3=(x3_t-x3_b)/(n3-1);
 
-	// grid step along the X1 axis
-	DX1=(X1E-X1W)/(N1-1);
-	DX2=(X2N-X2S)/(N2-1);
-	DX3=(X3T-X3B)/(N3-1);
-
-	X1[0] = X1W - DX1;
-	X2[0] = X2S - DX2;
-	X3[0] = X3B - DX3;
+	x1[0] = x1_w - dx1;
+	x2[0] = x2_s - dx2;
+	x3[0] = x3_b - dx3;
 
 	// block of arrays initialization
-	for (int i = 0; i <= N1 ; ++i) {
-		X1[i+1] = X1[i] + DX1;
+	for (int i = 0; i <= n1 ; ++i) {
+		x1[i+1] = x1[i] + dx1;
 	}
 
-	for (int j = 0; j <= N2 ; ++j) {
-		X2[j +1] = X2[j] + DX2;
+	for (int j = 0; j <= n2 ; ++j) {
+		x2[j +1] = x2[j] + dx2;
 	}
 
-	for (int k = 0; k <= N3 ; ++k) {
-		X3[k +1] = X3[k] + DX3;
+	for (int k = 0; k <= n3 ; ++k) {
+		x3[k +1] = x3[k] + dx3;
 	}
 
-	for (int i = 0; i <= N1; ++i) {
-		for (int j = 0; j <= N2; ++j) {
-			for (int k = 0; k <= N3; ++k) {
-				U1CON[i][j][k] = U1NCON[i][j][k] = U10;
-				U2CON[i][j][k] = U2NCON[i][j][k] = U20;
-				U3CON[i][j][k] = U3NCON[i][j][k] = U30;
-				ROCON[i][j][k] = RONCON[i][j][k] = RO0G;
-				TCON[i][j][k] = TNCON[i][j][k] = T0;
+	for (int i = 0; i <= n1; ++i) {
+		for (int j = 0; j <= n2; ++j) {
+			for (int k = 0; k <= n3; ++k) {
+				u1Con[i][j][k] = u1nCon[i][j][k] = u10;
+				u2Con[i][j][k] = u2nCon[i][j][k] = u20;
+				u3Con[i][j][k] = u3nCon[i][j][k] = u30;
+				roCon[i][j][k] = ronCon[i][j][k] = ro0_g;
+				tCon[i][j][k] = tnCon[i][j][k] = t0;
 
-				P1[i][j][k] = P2[i][j][k] = P3[i][j][k] = 0.;
-				RO1[i][j][k] = RO2[i][j][k] = RO3[i][j][k] = RO0G;
-				U11[i][j][k] = U12[i][j][k] = U13[i][j][k] = U10;
-				U21[i][j][k] = U22[i][j][k] = U23[i][j][k] = U20;
-				U31[i][j][k] = U32[i][j][k] = U33[i][j][k] = U30;
-				T1[i][j][k] = T2[i][j][k] = T3[i][j][k] = T0;
+				p1[i][j][k] = p2[i][j][k] = p3[i][j][k] = 0.;
+				ro1[i][j][k] = ro2[i][j][k] = ro3[i][j][k] = ro0_g;
+				u11[i][j][k] = u12[i][j][k] = u13[i][j][k] = u10;
+				u21[i][j][k] = u22[i][j][k] = u23[i][j][k] = u20;
+				u31[i][j][k] = u32[i][j][k] = u33[i][j][k] = u30;
+				t1[i][j][k] = t2[i][j][k] = t3[i][j][k] = t0;
 			}
 
 		}
 	}
 
-	for (int j = 0; j <= N2; ++j) {
-		for (int k = 0; k <= N3; ++k) {
-			P1[N1+1][j][k] = 0.;
-			RO1[N1+1][j][k] = RO0G;
-			U11[N1+1][j][k] = U10;
-			U21[N1+1][j][k] = U20;
-			U31[N1+1][j][k] = U30;
-			T1[N1+1][j][k] = T0;
+	for (int j = 0; j <= n2; ++j) {
+		for (int k = 0; k <= n3; ++k) {
+			p1[n1+1][j][k] = 0.;
+			ro1[n1+1][j][k] = ro0_g;
+			u11[n1+1][j][k] = u10;
+			u21[n1+1][j][k] = u20;
+			u31[n1+1][j][k] = u30;
+			t1[n1+1][j][k] = t0;
 		}
 	}
 
-	for (int i = 0; i <= N1; ++i) {
-		for (int k = 0; k <= N3; ++k) {
-			P2[i][N2+1][k] = 0.;
-			RO2[i][N2+1][k] = RO0G;
-			U12[i][N2+1][k] = U10;
-			U22[i][N2+1][k] = U20;
-			U32[i][N2+1][k] = U30;
-			T2[i][N2+1][k] = T0;
+	for (int i = 0; i <= n1; ++i) {
+		for (int k = 0; k <= n3; ++k) {
+			p2[i][n2+1][k] = 0.;
+			ro2[i][n2+1][k] = ro0_g;
+			u12[i][n2+1][k] = u10;
+			u22[i][n2+1][k] = u20;
+			u32[i][n2+1][k] = u30;
+			t2[i][n2+1][k] = t0;
 		}
 	}
 
-	for (int i = 0; i <= N1; ++i) {
-		for (int j = 0; j <= N2; ++j) {
-			P3[i][j][N3+1] = 0.;
-			RO3[i][j][N3+1] = RO0G;
-			U13[i][j][N3+1] = U10;
-			U23[i][j][N3+1] = U20;
-			U33[i][j][N3+1] = U30;
-			T3[i][j][N3+1] = T0;
+	for (int i = 0; i <= n1; ++i) {
+		for (int j = 0; j <= n2; ++j) {
+			p3[i][j][n3+1] = 0.;
+			ro3[i][j][n3+1] = ro0_g;
+			u13[i][j][n3+1] = u10;
+			u23[i][j][n3+1] = u20;
+			u33[i][j][n3+1] = u30;
+			t3[i][j][n3+1] = t0;
 		}
 	}
 
@@ -285,39 +283,41 @@ void InitializeData()
 
 void TimeStepSize()
 {
-	double X1C, X1L, U1C, U2C, U3C, DTU1, DTU2, DTU3, DTU, DTV1, DTV2, DTV3, DTV;
+	double x1c, x1l, u1c, u2c, u3c, dtu1, dtu2, dtu3, dtu, dtv1, dtv2, dtv3, dtv;
 
-	for (int i = 1; i < N1; ++i) {
-		for (int j = 1; j < N2; ++j) {
-			for (int k = 1; k < N3; ++k) {
-				X1C = (X1[i+1] + X1[i])/2;
-				X1L = 1+(L-1)*(X1C-1);
+	dt = pow(10, 8);
 
-				U1C = U1CON[i][j][k];
-				U2C = U2CON[i][j][k];
-				U3C = U3CON[i][j][k];
+	for (int i = 1; i < n1; ++i) {
+		for (int j = 1; j < n2; ++j) {
+			for (int k = 1; k < n3; ++k) {
+				x1c = (x1[i+1] + x1[i])/2;
+				x1l = 1+(l-1)*(x1c-1);
 
-				DTU1 = CFL*DX1/(SOUND + fabs(U1C));
-				DTU2 = CFL*X1L*DX2/(SOUND + fabs(U2C));
-				DTU3 = CFL*DX3/(SOUND + fabs(U3C));
+				u1c = u1Con[i][j][k];
+				u2c = u2Con[i][j][k];
+				u3c = u3Con[i][j][k];
+
+				dtu1 = CFL*dx1/(sound + fabs(u1c));
+				dtu2 = CFL*x1l*dx2/(sound + fabs(u2c));
+				dtu3 = CFL*dx3/(sound + fabs(u3c));
 
 				// DTU = MIN(DTU1, DTU2, DTU3)
-				DTU = DTU1 > DTU2 ? DTU2 : DTU1;
-				DTU = DTU > DTU3 ? DTU3 : DTU;
+				dtu = dtu1 > dtu2 ? dtu2 : dtu1;
+				dtu = dtu > dtu3 ? dtu3 : dtu;
 
 				if (VIS > pow(10, -16)) {
-					DTV1 = CFL*DX1*DX1/(2.*VIS);
-					DTV2 = CFL*(X1L*DX2)*(X1L*DX2)/(2.*VIS);
-					DTV3 = CFL*DX3*DX3/(2.*VIS);
+					dtv1 = CFL*dx1*dx1/(2.*VIS);
+					dtv2 = CFL*(x1l*dx2)*(x1l*dx2)/(2.*VIS);
+					dtv3 = CFL*dx3*dx3/(2.*VIS);
 
 					// DTV = MIN (DTV1, DTV2, DTV3)
-					DTV = DTV1 > DTV2 ? DTV2 : DTV1;
-					DTV = DTV > DTV3 ? DTV3 : DTV;
+					dtv = dtv1 > dtv2 ? dtv2 : dtv1;
+					dtv = dtv > dtv3 ? dtv3 : dtv;
 				} else {
-					DTV = pow(10, 16);
+					dtv = pow(10, 16);
 				}
-				double dttemp = DTU > DTV ? DTV : DTU;
-				if (dttemp < DT) DT = dttemp;
+				double dttemp = dtu > dtv ? dtv : dtu;
+				if (dttemp < dt) dt = dttemp;
 			}
 		}
 	}
@@ -326,511 +326,511 @@ void TimeStepSize()
 void Phase1()
 {
 	// initialization
-	for (int i = 1; i < N1; i++)
+	for (int i = 1; i < n2; i++)
 	{
-		for (int j = 1; j < N2; j++)
+		for (int j = 1; j < n1; j++)
 		{
-			for (int k = 1; k < N3; k++)
+			for (int k = 1; k < n3; k++)
 			{
-				U1CON[i][j][k] = U1NCON[i][j][k];
-				U1CON[i][j][k] = U1NCON[i][j][k];
-				U1CON[i][j][k] = U1NCON[i][j][k];
-				ROCON[i][j][k] = RONCON[i][j][k];
-				TCON[i][j][k] = TNCON[i][j][k];
+				u1Con[i][j][k] = u1nCon[i][j][k];
+				u1Con[i][j][k] = u1nCon[i][j][k];
+				u1Con[i][j][k] = u1nCon[i][j][k];
+				roCon[i][j][k] = ronCon[i][j][k];
+				tCon[i][j][k] = tnCon[i][j][k];
 			}
 		}
 	}
 
 	// geometric characteristics of the computational cell
-	double DS1, DS2, DS3, DVC, XLE, XLW, XLT, XLB, ALFA;
+	double ds1, ds2, ds3, dvc, xle, xlw, xlt, xlb, alfa;
 
 			// velocity, density, temperature and pressure on the eastern plane
-	double	U1E, U2E, U3E, ROE, TE, PE,
+	double	u1_e, u2_e, u3_e, roe, te, pe,
 			// velocity, density , temperature and pressure on the western plane
-			U1W, U2W, U3W, ROW, TW, PW,
+			u1_w, u2_w, u3_w, row, tw, pw,
 			// velocity, density , temperature and pressure on the northern plane
-			U1N, U2N, U3N, RON, TN, PN,
+			u1_n, u2_n, u3_n, ron, tn, pn,
 			// velocity, density , temperature and pressure on the southern plane
-			U1S, U2S, U3S, ROS, TS, PS,
+			u1_s, u2_s, u3_s, ros, ts, ps,
 			// velocity, density , temperature and pressure on the top plane
-			U1T, U2T, U3T, ROT, TT, PT,
+			u1_t, u2_t, u3_t, rot, tt, pt,
 			// velocity, density , temperature and pressure on the bottom plane
-			U1B, U2B, U3B, ROB, TB, PB,
+			u1_b, u2_b, u3_b, rob, tb, pb,
 			// velocity, density and temperature in the cell center
-			U1C, U2C, U3C, ROC, TC,
+			u1_c, u2_c, u3_c, roc, tc,
 			// velocity, density and temperature in the cell center on the next time step
-			U1CN, U2CN, U3CN, ROCN, TCN;
+			u1_cn, u2_cn, u3_cn, rocn, tcn;
 
 	// plane squares
-	DS1 = DX2*DX3;
-	DS2 = DX1*DX3; 
-	DS3 = DX1*DX2;
+	ds1 = dx2*dx3;
+	ds2 = dx1*dx3; 
+	ds3 = dx1*dx2;
 
-	for (int i = 1; i < N1; i++)
+	for (int i = 1; i < n1; i++)
 	{
-		for (int j = 1; j < N2; j++)
+		for (int j = 1; j < n2; j++)
 		{
-			for (int k = 1; k < N3; k++)
+			for (int k = 1; k < n3; k++)
 			{
 				// geometric factor of cylindricity
-				XLE = 1 + (L - 1)*(X1[i] - 1);
+				xle = 1 + (l - 1)*(x1[i] - 1);
 				// geometric factor of cylindricity
-				XLW = 1 + (L - 1)*(X1[i - 1] - 1);
+				xlw = 1 + (l - 1)*(x1[i - 1] - 1);
 				// geometric factor of cylindricity
-				XLT = 0.5*(XLE + XLW);
+				xlt = 0.5*(xle + xlw);
 				// geometric factor of cylindricity
-				XLB = XLT;
+				xlb = xlt;
 				// cell volume
-				DVC = 0.5*(XLE + XLW)*DX1*DX2*DX3;
+				dvc = 0.5*(xle + xlw)*dx1*dx2*dx3;
 				// geometric parameter
-				ALFA = DT*(L - 1)*DX1*DX2*DX3 / (2 * DVC);
+				alfa = dt*(l - 1)*dx1*dx2*dx3 / (2 * dvc);
 
 				// #########################################################
 				//	get velocity, density , temperature and pressure values
 				// #########################################################
 
 				// east plane
-				U1E = U11[i + 1][j][k];
-				U2E = U21[i + 1][j][k];
-				U3E = U31[i + 1][j][k];
-				ROE = RO1[i + 1][j][k];
-				TE = T1[i + 1][j][k];
-				PE = P1[i + 1][j][k];
+				u1_e = u11[i + 1][j][k];
+				u2_e = u21[i + 1][j][k];
+				u3_e = u31[i + 1][j][k];
+				roe = ro1[i + 1][j][k];
+				te = t1[i + 1][j][k];
+				pe = p1[i + 1][j][k];
 				// west plane
-				U1W = U11[i][j][k];
-				U2W = U21[i][j][k];
-				U3W = U31[i][j][k];
-				ROW = RO1[i][j][k];
-				TW = T1[i][j][k];
-				PW = P1[i][j][k];
+				u1_w = u11[i][j][k];
+				u2_w = u21[i][j][k];
+				u3_w = u31[i][j][k];
+				row = ro1[i][j][k];
+				tw = t1[i][j][k];
+				pw = p1[i][j][k];
 
 				// north plane
-				U1N = U12[i][j + 1][k];
-				U2N = U22[i][j + 1][k];
-				U3N = U32[i][j + 1][k];
-				RON = RO2[i][j + 1][k];
-				TN = T2[i][j + 1][k];
-				PN = P2[i][j + 1][k];
+				u1_n = u12[i][j + 1][k];
+				u2_n = u22[i][j + 1][k];
+				u3_n = u32[i][j + 1][k];
+				ron = ro2[i][j + 1][k];
+				tn = t2[i][j + 1][k];
+				pn = p2[i][j + 1][k];
 				// south plane
-				U1S = U12[i][j][k];
-				U2S = U22[i][j][k];
-				U3S = U32[i][j][k];
-				ROS = RO2[i][j][k];
-				TS = T2[i][j][k];
-				PS = P2[i][j][k];
+				u1_s = u12[i][j][k];
+				u2_s = u22[i][j][k];
+				u3_s = u32[i][j][k];
+				ros = ro2[i][j][k];
+				ts = t2[i][j][k];
+				ps = p2[i][j][k];
 
 				// top plane
-				U1T = U13[i][j][k + 1];
-				U2T = U23[i][j][k + 1];
-				U3T = U33[i][j][k + 1];
-				ROT = RO3[i][j][k + 1];
-				TT = T3[i][j][k + 1];
-				PT = P3[i][j][k + 1];
+				u1_t = u13[i][j][k + 1];
+				u2_t = u23[i][j][k + 1];
+				u3_t = u33[i][j][k + 1];
+				rot = ro3[i][j][k + 1];
+				tt = t3[i][j][k + 1];
+				pt = p3[i][j][k + 1];
 				// bottom plane
-				U1B = U13[i][j][k];
-				U2B = U23[i][j][k];
-				U3B = U33[i][j][k];
-				ROB = RO3[i][j][k];
-				TB = T3[i][j][k];
-				PB = P3[i][j][k];
+				u1_b = u13[i][j][k];
+				u2_b = u23[i][j][k];
+				u3_b = u33[i][j][k];
+				rob = ro3[i][j][k];
+				tb = t3[i][j][k];
+				pb = p3[i][j][k];
 
 				// cell center
-				U1C = U1CON[i][j][k];
-				U2C = U2CON[i][j][k];
-				U3C = U3CON[i][j][k];
-				ROC = ROCON[i][j][k];
-				TC = TCON[i][j][k];
+				u1_c = u1Con[i][j][k];
+				u2_c = u2Con[i][j][k];
+				u3_c = u3Con[i][j][k];
+				roc = roCon[i][j][k];
+				tc = tCon[i][j][k];
 				
 				// #####################################################
 				//					new values evaluating
 				// #####################################################
 
 				// new density
-				ROCN = (ROC*DVC - 0.5*DT*((XLE*ROE*U1E - XLW*ROW*U1W)*DS1 +
-					(RON*U2N - ROS*U2S)*DS2 + (XLT*ROT*U3T - XLB*ROB*U3B)*DS3)) / DVC;
+				rocn = (roc*dvc - 0.5*dt*((xle*roe*u1_e - xlw*row*u1_w)*ds1 +
+					(ron*u2_n - ros*u2_s)*ds2 + (xlt*rot*u3_t - xlb*rob*u3_b)*ds3)) / dvc;
 				
-				// new conservative velocity along the X1 axis
-				double U1CP = (ROC*U1C*DVC - 0.5*DT*((RON*U2N*U1N - ROS*U2S*U1S)*DS2 +
-					(XLT*ROT*U3T*U1T - XLB*ROB*U3B*U1B)*DS3 +
-					(XLE*(ROE*U1E*ROE*U1E + PE) - XLW*(ROW*U1W*ROW*U1W + PW))*DS1
-					- 0.5*(L - 1)*(PE + PW)*DX1*DX2*DX3)) / (DVC*ROCN);
+				// new conservative velocity along the x1 axis
+				double U1CP = (roc*u1_c*dvc - 0.5*dt*((ron*u2_n*u1_n - ros*u2_s*u1_s)*ds2 +
+					(xlt*rot*u3_t*u1_t - xlb*rob*u3_b*u1_b)*ds3 +
+					(xle*(roe*u1_e*roe*u1_e + pe) - xlw*(row*u1_w*row*u1_w + pw))*ds1
+					- 0.5*(l - 1)*(pe + pw)*dx1*dx2*dx3)) / (dvc*rocn);
 				// new conservative velocity along the X2 axis
-				double U2CP = U2CP = (ROC*U2C*DVC - 0.5*DT*((XLE*ROE*U1E*U2E - XLW*ROW*U1W*U2W)*DS1 +
-					((RON*U2N*RON*U2N + PN) - (ROS*U2S*ROS*U2S + PS))*DS2 +
-					(XLT*ROT*U3T*U2T - XLB*ROB*U3B*U2B)*DS3)) / (DVC*ROCN);
+				double U2CP = U2CP = (roc*u2_c*dvc - 0.5*dt*((xle*roe*u1_e*u2_e - xlw*row*u1_w*u2_w)*ds1 +
+					((ron*u2_n*ron*u2_n + pn) - (ros*u2_s*ros*u2_s + ps))*ds2 +
+					(xlt*rot*u3_t*u2_t - xlb*rob*u3_b*u2_b)*ds3)) / (dvc*rocn);
 
 				// take into account of centrifugal and Coriolis forces
-				U1CN = (U1CP - ALFA*U2C*U1CP) / (1 + (ALFA*U2C)*(ALFA*U2C));
-				U2CN = U2CP - ALFA*U2C*U1CN;
+				u1_cn = (U1CP - alfa*u2_c*U1CP) / (1 + (alfa*u2_c)*(alfa*u2_c));
+				u2_cn = U2CP - alfa*u2_c*u1_cn;
 
 				// new conservative velocity along the X3 axis
-				U3CN = (ROC*U3C*DVC - 0.5*DT*((XLE*ROE*U1E*U3E - XLW*ROW*U1W*U3W)*DS1 +
-					(RON*U2N*U3N - ROS*U2S*U3S)*DS2 +
-					(XLT*(ROT*U3T*ROT*U3T + PT) - XLB*(ROB*U3B*ROB*U3B + PB))*DS3)) / (DVC*ROCN);
+				u3_cn = (roc*u3_c*dvc - 0.5*dt*((xle*roe*u1_e*u3_e - xlw*row*u1_w*u3_w)*ds1 +
+					(ron*u2_n*u3_n - ros*u2_s*u3_s)*ds2 +
+					(xlt*(rot*u3_t*rot*u3_t + pt) - xlb*(rob*u3_b*rob*u3_b + pb))*ds3)) / (dvc*rocn);
 
 				// new temperature
-				TCN = (ROC*TC*DVC - 0.5*DT*((XLE*ROE*TE*U1E - XLW*ROW*TW*U1W)*DS1 +
-					(RON*TN*U2N - ROS*TS*U2S)*DS2 +
-					(XLT*ROT*TT*U3T - XLB*ROB*TB*U3B)*DS3)) / (DVC*ROCN);
+				tcn = (roc*tc*dvc - 0.5*dt*((xle*roe*te*u1_e - xlw*row*tw*u1_w)*ds1 +
+					(ron*tn*u2_n - ros*ts*u2_s)*ds2 +
+					(xlt*rot*tt*u3_t - xlb*rob*tb*u3_b)*ds3)) / (dvc*rocn);
 
 				// finally
-				U1NCON[i][j][k] = U1CN;
-				U2NCON[i][j][k] = U2CN;
-				U3NCON[i][j][k] = U3CN;
-				RONCON[i][j][k] = ROCN;
-				TNCON[i][j][k] = TCN;
+				u1nCon[i][j][k] = u1_cn;
+				u2nCon[i][j][k] = u2_cn;
+				u3nCon[i][j][k] = u3_cn;
+				ronCon[i][j][k] = rocn;
+				tnCon[i][j][k] = tcn;
 			}
 		}
 	}
 
 	// periodicity conditions
-	for (int i = 1; i <= N1; ++i)
+	for (int i = 1; i <= n1; ++i)
 	{
-		for (int k = 1; k <= N3; ++k)
+		for (int k = 1; k <= n3; ++k)
 		{
 			// periodicity condition on the north plane
-			U1NCON[i][N2][k] = U1NCON[i][1][k];
-			U2NCON[i][N2][k] = U2NCON[i][1][k];
-			U3NCON[i][N2][k] = U3NCON[i][1][k];
-			RONCON[i][N2][k] = RONCON[i][1][k];
-			TNCON[i][N2][k] = TNCON[i][1][k];
+			u1nCon[i][n2][k] = u1nCon[i][1][k];
+			u2nCon[i][n2][k] = u2nCon[i][1][k];
+			u3nCon[i][n2][k] = u3nCon[i][1][k];
+			ronCon[i][n2][k] = ronCon[i][1][k];
+			tnCon[i][n2][k] = tnCon[i][1][k];
 			// periodicity condition on the south plane
-			U1NCON[i][0][k] = U1NCON[i][N2 - 1][k];
-			U2NCON[i][0][k] = U2NCON[i][N2 - 1][k];
-			U3NCON[i][0][k] = U3NCON[i][N2 - 1][k];
-			RONCON[i][0][k] = RONCON[i][N2 - 1][k];
-			TNCON[i][0][k] = TNCON[i][N2 - 1][k];
+			u1nCon[i][0][k] = u1nCon[i][n2 - 1][k];
+			u2nCon[i][0][k] = u2nCon[i][n2 - 1][k];
+			u3nCon[i][0][k] = u3nCon[i][n2 - 1][k];
+			ronCon[i][0][k] = ronCon[i][n2 - 1][k];
+			tnCon[i][0][k] = tnCon[i][n2 - 1][k];
 		}
 	}	
 
 	// no-slip conditions
-	for (int j = 1; j < N2; ++j)
+	for (int j = 1; j < n2; ++j)
 	{
-		for (int k = 1; k < N3; ++k)
+		for (int k = 1; k < n3; ++k)
 		{
 			// no-slip consition on the west plane
-			U1NCON[0][j][k] = 0.;
-			U2NCON[0][j][k] = 0.;
-			U3NCON[0][j][k] = 0.;
-			RONCON[0][j][k] = RONCON[1][j][k];
-			TNCON[0][j][k] = T0;
+			u1nCon[0][j][k] = 0.;
+			u2nCon[0][j][k] = 0.;
+			u3nCon[0][j][k] = 0.;
+			ronCon[0][j][k] = ronCon[1][j][k];
+			tnCon[0][j][k] = t0;
 
 			// no-slip consition on the east plane
-			U1NCON[N1][j][k] = 0.;
-			U2NCON[N1][j][k] = 0.;
-			U3NCON[N1][j][k] = 0.;
-			RONCON[N1][j][k] = RONCON[N1 - 1][j][k];
-			TNCON[N1][j][k] = T0;
+			u1nCon[n1][j][k] = 0.;
+			u2nCon[n1][j][k] = 0.;
+			u3nCon[n1][j][k] = 0.;
+			ronCon[n1][j][k] = ronCon[n1 - 1][j][k];
+			tnCon[n1][j][k] = t0;
 		}
 	}
 }
 
 void Phase2()
 {
-	double U1F, U1B, U1CN, U1C,
-		U2F, U2FN, U2B, U2BN, U2CN, U2C,
-		U3F, U3FN, U3B, U3BN, U3CN, U3C,
-		ROF, ROB, ROCN, ROC,
-		TF, TFN, TB, TBN, TCN, TC,
-		PF, PB, PCN, PC,
-		RF, RFN, RB, RCN, RC,
-		QF, QB, QBN, QCN, QC;
+	double u1f, u1b, u1cn, u1c,
+		u2f, u2fn, u2b, u2bn, u2cn, u2c,
+		u3f, U3FN, u3b, U3BN, U3CN, u3c,
+		rof, rob, rocn, roc,
+		tf, tfn, tb, tbn, tcn, tc,
+		pf, pb, pcn, pc,
+		rf, rfn, rb, rcn, rc,
+		qf, qb, qbn, QCN, qc;
 
-	double GR, GT, GU2, GU3,
-		GQ;
+	double gr, gt, gu2, gu3,
+		gq;
 
-	double RMAX, RMIN, QMAX, QMIN, TMAX, TMIN, U2MAX, U2MIN, U3MAX, U3MIN;
+	double rmax, rmin, qmax, qmin, tmax, tmin, U2MAX, U2MIN, u3max, u3min;
 
-	double RO0B, RO0F, QN, PN, RN, RON, TN, UN, U2N, U3N, UCF, UCB;
+	double ro0b, ro0f, qn, pn, rn, ron, tn, un, u2n, u3n, ucf, ucb;
 
 	// first local invariants for the interior faces puts in the buffer arrays, bypass on the center of the cell
 	// then by taking into account the boundary condition calculates extreme elements of the buffers
 	// and only then calculates the flow variables
 
-	// flow variables calculation on DS1 faces orthogonal X1 axis 
+	// flow variables calculation on DS1 faces orthogonal x1 axis 
 
-	// bypassing along the X1 axis
+	// bypassing along the x1 axis
 
 	// only interior faces !
-	for (int k = 1; k < N3; k++)
+	for (int k = 1; k < n3; k++)
 	{
-		for (int j = 1; j < N2; j++)
+		for (int j = 1; j < n2; j++)
 		{
-			for (int i = 1; i < N1; i++)
+			for (int i = 1; i < n1; i++)
 			{
-				U1F = U11[i + 1][j][k];
-				U1B = U11[i][j][k];
-				U1CN = U1NCON[i][j][k];
-				U1C = U1CON[i][j][k];
+				u1f = u11[i + 1][j][k];
+				u1b = u11[i][j][k];
+				u1cn = u1nCon[i][j][k];
+				u1c = u1Con[i][j][k];
 
-				U2F = U21[i + 1][j][k];
-				U2B = U21[i][j][k];
-				U2CN = U2NCON[i][j][k];
-				U2C = U2CON[i][j][k];
+				u2f = u21[i + 1][j][k];
+				u2b = u21[i][j][k];
+				u2cn = u2nCon[i][j][k];
+				u2c = u2Con[i][j][k];
 
-				U3F = U31[i + 1][j][k];
-				U3B = U31[i][j][k];
-				U3CN = U3NCON[i][j][k];
-				U3C = U3CON[i][j][k];
+				u3f = u31[i + 1][j][k];
+				u3b = u31[i][j][k];
+				U3CN = u3nCon[i][j][k];
+				u3c = u3Con[i][j][k];
 
-				ROF = RO1[i + 1][j][k];
-				ROB = RO1[i][j][k];
-				ROCN = ROCON[i][j][k];
-				ROC = ROCON[i][j][k];
+				rof = ro1[i + 1][j][k];
+				rob = ro1[i][j][k];
+				rocn = roCon[i][j][k];
+				roc = roCon[i][j][k];
 
-				TF = T1[i + 1][j][k];
-				TB = T1[i][j][k];
-				TCN = TNCON[i][j][k];
-				TC = TCON[i][j][k];
+				tf = t1[i + 1][j][k];
+				tb = t1[i][j][k];
+				tcn = tnCon[i][j][k];
+				tc = tCon[i][j][k];
 
-				PF = P1[i + 1][j][k];
-				PB = P1[i][j][k];
-				PCN = SOUND*SOUND*(ROCN - RO0G);
-				PC = SOUND*SOUND*(ROC - RO0G);
+				pf = p1[i + 1][j][k];
+				pb = p1[i][j][k];
+				pcn = sound*sound*(rocn - ro0_g);
+				pc = sound*sound*(roc - ro0_g);
 
 				// invariant calculation
 
-				RF = U1F + PF / (RO0G * SOUND);
-				RB = U1B + PB / (RO0G * SOUND);
-				RCN = U1CN + PCN / (RO0G * SOUND);
-				RC = U1C + PC / (RO0G * SOUND);
+				rf = u1f + pf / (ro0_g * sound);
+				rb = u1b + pb / (ro0_g * sound);
+				rcn = u1cn + pcn / (ro0_g * sound);
+				rc = u1c + pc / (ro0_g * sound);
 
-				RFN = 2 * RCN - RB;
+				rfn = 2 * rcn - rb;
 
-				QF = U1F - PF / (RO0G * SOUND);
-				QB = U1B - PB / (RO0G * SOUND);
-				QCN = U1CN - PCN / (RO0G * SOUND);
-				QC = U1C - PC / (RO0G * SOUND);
+				qf = u1f - pf / (ro0_g * sound);
+				qb = u1b - pb / (ro0_g * sound);
+				QCN = u1cn - pcn / (ro0_g * sound);
+				qc = u1c - pc / (ro0_g * sound);
 
-				QBN = 2 * QCN - QF;
+				qbn = 2 * QCN - qf;
 
-				TFN = 2 * TCN - TB;
-				TBN = 2 * TCN - TF;
+				tfn = 2 * tcn - tb;
+				tbn = 2 * tcn - tf;
 
-				U2FN = 2 * U2CN - U2B;
-				U2BN = 2 * U2CN - U2F;
+				u2fn = 2 * u2cn - u2b;
+				u2bn = 2 * u2cn - u2f;
 
-				U3FN = 2 * U3CN - U3B;
-				U3BN = 2 * U3CN - U3F;
+				U3FN = 2 * U3CN - u3b;
+				U3BN = 2 * U3CN - u3f;
 
 				// the permissible range of changes
-				GR = 2 * (RCN - RC) / DT + (U1CN + SOUND)*(RF - RB) / DX1;
-				GQ = 2 * (RCN - RC) / DT + (U1CN - SOUND)*(QF - QB) / DX1;
+				gr = 2 * (rcn - rc) / dt + (u1cn + sound)*(rf - rb) / dx1;
+				gq = 2 * (rcn - rc) / dt + (u1cn - sound)*(qf - qb) / dx1;
 
-				GT = 2 * (TCN - TC) / DT + U1CN*(TF - TB) / DX1;
-				GU2 = 2 * (U2CN - U2C) / DT + U1CN*(U2F - U2B) / DX1;
-				GU3 = 2 * (U3CN - U3C) / DT + U1CN*(U3F - U3B) / DX1;
+				gt = 2 * (tcn - tc) / dt + u1cn*(tf - tb) / dx1;
+				gu2 = 2 * (u2cn - u2c) / dt + u1cn*(u2f - u2b) / dx1;
+				gu3 = 2 * (U3CN - u3c) / dt + u1cn*(u3f - u3b) / dx1;
 
-				// RMAX=MAX(RF,RC,RB) +DT*GR
-				RMAX = RF > RC ? RF : RC;
-				RMAX = RMAX > RB ? RMAX : RB;
-				RMAX += DT*GR;
+				// RMAX=MAX(RF,RC,RB) +dt*GR
+				rmax = rf > rc ? rf : rc;
+				rmax = rmax > rb ? rmax : rb;
+				rmax += dt*gr;
 
-				// RMIN=MIN(RF,RC,RB) +DT*GR
-				RMIN = RF < RC ? RF : RC;
-				RMIN = RMIN < RB ? RMIN : RB;
-				RMIN += DT*GR;
+				// RMIN=MIN(RF,RC,RB) +dt*GR
+				rmin = rf < rc ? rf : rc;
+				rmin = rmin < rb ? rmin : rb;
+				rmin += dt*gr;
 
-				// QMAX=MAX(QF,QC,QB) +DT*GQ
-				QMAX = QF > QC ? QF : QC;
-				QMAX = QMAX > QB ? QMAX : QB;
-				QMAX += DT*GQ;
+				// QMAX=MAX(QF,QC,QB) +dt*GQ
+				qmax = qf > qc ? qf : qc;
+				qmax = qmax > qb ? qmax : qb;
+				qmax += dt*gq;
 
-				// QMIN=MIN(QF,QC,QB) +DT*GQ
-				QMIN = QF < QC ? QF : QC;
-				QMIN = QMIN < QB ? QMIN : QB;
-				QMIN += DT*GQ;
+				// QMIN=MIN(QF,QC,QB) +dt*GQ
+				qmin = qf < qc ? qf : qc;
+				qmin = qmin < qb ? qmin : qb;
+				qmin += dt*gq;
 
-				// TMAX=MAX(TF,TC,TB) +DT*GT
-				TMAX = TF > TC ? TF : TC;
-				TMAX = TMAX > TB ? TMAX : TB;
-				TMAX += DT*GT;
+				// TMAX=MAX(TF,TC,TB) +dt*GT
+				tmax = tf > tc ? tf : tc;
+				tmax = tmax > tb ? tmax : tb;
+				tmax += dt*gt;
 
-				// TMIN=MIN(TF,TC,TB) +DT*GT
-				TMIN = TF < TC ? TF : TC;
-				TMIN = TMIN < TB ? TMIN : TB;
-				TMIN += DT*GT;
+				// TMIN=MIN(TF,TC,TB) +dt*GT
+				tmin = tf < tc ? tf : tc;
+				tmin = tmin < tb ? tmin : tb;
+				tmin += dt*gt;
 
-				// U2MAX=MAX(U2F,U2C,U2B) +DT*GU2
-				U2MAX = U2F > U2C ? U2F : U2C;
-				U2MAX = U2MAX > U2B ? U2MAX : U2B;
-				U2MAX += DT*GU2;
+				// U2MAX=MAX(U2F,U2C,U2B) +dt*GU2
+				U2MAX = u2f > u2c ? u2f : u2c;
+				U2MAX = U2MAX > u2b ? U2MAX : u2b;
+				U2MAX += dt*gu2;
 
-				// U2MIN=MIN(U2F,U2C,U2B) +DT*GU2
-				U2MIN = U2F < U2C ? U2F : U2C;
-				U2MIN = U2MIN < U2B ? U2MIN : U2B;
-				U2MIN += DT*GU2;
+				// U2MIN=MIN(U2F,U2C,U2B) +dt*GU2
+				U2MIN = u2f < u2c ? u2f : u2c;
+				U2MIN = U2MIN < u2b ? U2MIN : u2b;
+				U2MIN += dt*gu2;
 
-				// U3MAX=MAX(U3F,U3C,U3B) +DT*GU3
-				U3MAX = U3F > U3C ? U3F : U3C;
-				U3MAX = U3MAX > U3B ? U3MAX : U3B;
-				U3MAX += DT*GU3;
+				// U3MAX=MAX(U3F,U3C,U3B) +dt*GU3
+				u3max = u3f > u3c ? u3f : u3c;
+				u3max = u3max > u3b ? u3max : u3b;
+				u3max += dt*gu3;
 
-				// U3MIN=MIN(U3F,U3C,U3B) +DT*GU3 
-				U3MIN = U3F < U3C ? U3F : U3C;
-				U3MIN = U3MIN < U3B ? U3MIN : U3B;
-				U3MIN += DT*GU3;
+				// U3MIN=MIN(U3F,U3C,U3B) +dt*GU3 
+				u3min = u3f < u3c ? u3f : u3c;
+				u3min = u3min < u3b ? u3min : u3b;
+				u3min += dt*gu3;
 
 				// invariants correction
-				if (RFN > RMAX) RFN = RMAX;
-				if (RFN < RMIN) RFN = RMIN;
+				if (rfn > rmax) rfn = rmax;
+				if (rfn < rmin) rfn = rmin;
 
-				if (QBN > QMAX) QBN = QMAX;
-				if (QBN < QMIN) QBN = QMIN;
+				if (qbn > qmax) qbn = qmax;
+				if (qbn < qmin) qbn = qmin;
 
-				if (TFN > TMAX) TFN = TMAX;
-				if (TFN < TMIN) TFN = TMIN;
+				if (tfn > tmax) tfn = tmax;
+				if (tfn < tmin) tfn = tmin;
 
-				if (TBN > TMAX) TBN = TMAX;
-				if (TBN < TMIN) TBN = TMIN;
+				if (tbn > tmax) tbn = tmax;
+				if (tbn < tmin) tbn = tmin;
 
-				if (U2FN > U2MAX) U2FN = U2MAX;
-				if (U2FN < U2MIN) U2FN = U2MIN;
+				if (u2fn > U2MAX) u2fn = U2MAX;
+				if (u2fn < U2MIN) u2fn = U2MIN;
 
-				if (U2BN > U2MAX) U2BN = U2MAX;
-				if (U2BN < U2MIN) U2BN = U2MIN;
+				if (u2bn > U2MAX) u2bn = U2MAX;
+				if (u2bn < U2MIN) u2bn = U2MIN;
 
-				if (U3FN > U3MAX) U3FN = U3MAX;
-				if (U3FN < U3MIN) U3FN = U3MIN;
+				if (U3FN > u3max) U3FN = u3max;
+				if (U3FN < u3min) U3FN = u3min;
 
-				if (U3BN > U3MAX) U3BN = U3MAX;
-				if (U3BN < U3MIN) U3BN = U3MIN;
+				if (U3BN > u3max) U3BN = u3max;
+				if (U3BN < u3min) U3BN = u3min;
 
 				// put invariants to buffers
-				RBUF[i + 1] = RFN;
-				QBUF[i] = QBN;
-				TFBUF[i + 1] = TFN;
-				TBBUF[i] = TBN;
-				U2FBUF[i + 1] = U2FN;
-				U2BBUF[i] = U2BN;
-				U3FBUF[i + 1] = U3FN;
-				U3BBUF[i] = U3BN;
+				rBuf[i + 1] = rfn;
+				qBuf[i] = qbn;
+				tfBuf[i + 1] = tfn;
+				tbBuf[i] = tbn;
+				u2fBuf[i + 1] = u2fn;
+				u2bBuf[i] = u2bn;
+				u3fBuf[i + 1] = U3FN;
+				u3bBuf[i] = U3BN;
 			}
 
-			// boundary conditions along the X1 axis
+			// boundary conditions along the x1 axis
 			// assignment of boundary invatiants and add them to the buffer arrays
 
 			// periodicity conditions
-			RBUF[1] = RBUF[N1];
-			TFBUF[1] = TFBUF[N1];
-			U2FBUF[1] = U2FBUF[N1];
-			U3FBUF[1] = U3FBUF[N1];
+			rBuf[1] = rBuf[n1];
+			tfBuf[1] = tfBuf[n1];
+			u2fBuf[1] = u2fBuf[n1];
+			u3fBuf[1] = u3fBuf[n1];
 
 			// periodicity conditions
-			QBUF[N1] = QBUF[1];
-			TBBUF[N1] = TBBUF[1];
-			U2BBUF[N1] = U2BBUF[1];
-			U3BBUF[N1] = U3BBUF[1];
+			qBuf[n1] = qBuf[1];
+			tbBuf[n1] = tbBuf[1];
+			u2bBuf[n1] = u2bBuf[1];
+			u3bBuf[n1] = u3bBuf[1];
 
 			// no-slip conditions
 			// i == 1
-			RO0B = RONCON[N1 - 1][j][k];
-			RO0F = RONCON[1][j][k];
+			ro0b = ronCon[n1 - 1][j][k];
+			ro0f = ronCon[1][j][k];
 
-			QN = QBUF[1];
-			UN = 0;
-			PN = -QN*SOUND*RO0G;
-			RON = (RO0G + PN / (SOUND*SOUND));
+			qn = qBuf[1];
+			un = 0;
+			pn = -qn*sound*ro0_g;
+			ron = (ro0_g + pn / (sound*sound));
 
-			TN = T0;
-			U2N = 0;
-			U3N = 0;
+			tn = t0;
+			u2n = 0;
+			u3n = 0;
 
-			P1[1][j][k] = PN;
-			U11[1][j][k] = UN;
-			RO1[1][j][k] = RON;
-			T1[1][j][k] = TN;
-			U21[1][j][k] = U2N;
-			U31[1][j][k] = U3N;
+			p1[1][j][k] = pn;
+			u11[1][j][k] = un;
+			ro1[1][j][k] = ron;
+			t1[1][j][k] = tn;
+			u21[1][j][k] = u2n;
+			u31[1][j][k] = u3n;
 
 
-			// i == N1
-			RN = RBUF[N1];
+			// i == n1
+			rn = rBuf[n1];
 
-			UN = 0;
-			PN = RN*SOUND*RO0G;
-			RON = (RO0G + PN / (SOUND*SOUND));
+			un = 0;
+			pn = rn*sound*ro0_g;
+			ron = (ro0_g + pn / (sound*sound));
 
-			TN = T0;
-			U2N = 0;
-			U3N = 0;
+			tn = t0;
+			u2n = 0;
+			u3n = 0;
 
-			P1[N1][j][k] = PN;
-			U11[N1][j][k] = UN;
-			RO1[N1][j][k] = RON;
-			T1[N1][j][k] = TN;
-			U21[N1][j][k] = U2N;
-			U31[N1][j][k] = U3N;
+			p1[n1][j][k] = pn;
+			u11[n1][j][k] = un;
+			ro1[n1][j][k] = ron;
+			t1[n1][j][k] = tn;
+			u21[n1][j][k] = u2n;
+			u31[n1][j][k] = u3n;
 
 			// the flow variables calculations
-			for (int i = 2; i < N1; i++)
+			for (int i = 2; i < n1; i++)
 			{
-				RO0B = RONCON[i - 1][j][k];
-				RO0F = RONCON[i][j][k];
+				ro0b = ronCon[i - 1][j][k];
+				ro0f = ronCon[i][j][k];
 
-				RN = RBUF[i];
-				QN = QBUF[i];
+				rn = rBuf[i];
+				qn = qBuf[i];
 
-				PN = (RN - QN)*SOUND*RO0G / 2;
-				UN = (RN + QN) / 2;
+				pn = (rn - qn)*sound*ro0_g / 2;
+				un = (rn + qn) / 2;
 
-				RON = (RO0G + PN / (SOUND*SOUND));
+				ron = (ro0_g + pn / (sound*sound));
 
-				UCF = U1NCON[i][j][k];
-				UCB = U1NCON[i - 1][j][k];
+				ucf = u1nCon[i][j][k];
+				ucb = u1nCon[i - 1][j][k];
 
-				if (UCF >= 0 && UCB > 0)
+				if (ucf >= 0 && ucb > 0)
 				{
-					TN = TFBUF[i];
-					U2N = U2FBUF[i];
-					U3N = U3FBUF[i];
+					tn = tfBuf[i];
+					u2n = u2fBuf[i];
+					u3n = u3fBuf[i];
 				}
-				else if (UCF <= 0 && UCB <= 0)
+				else if (ucf <= 0 && ucb <= 0)
 				{
-					TN = TBBUF[i];
-					U2N = U2BBUF[i];
-					U3N = U3BBUF[i];
+					tn = tbBuf[i];
+					u2n = u2bBuf[i];
+					u3n = u3bBuf[i];
 				}
-				else if (UCB >= 0 && UCF <= 0) 
+				else if (ucb >= 0 && ucf <= 0) 
 				{
-					if (UCB > -UCF) 
+					if (ucb > -ucf) 
 					{
-						TN = TFBUF[i];
-						U2N = U2FBUF[i];
-						U3N = U3FBUF[i];
+						tn = tfBuf[i];
+						u2n = u2fBuf[i];
+						u3n = u3fBuf[i];
 					}
 					else 
 					{
-						TN = TBBUF[i];
-						U2N = U2BBUF[i];
-						U3N = U3BBUF[i];
+						tn = tbBuf[i];
+						u2n = u2bBuf[i];
+						u3n = u3bBuf[i];
 					}
 				}
 				else
 				{
-					if (UCB <= 0 && UCF >= 0)
+					if (ucb <= 0 && ucf >= 0)
 					{
-						TN = TNCON[i][j][k] + TNCON[i - 1][j][k] - T1[i][j][k];
-						U2N = U2NCON[i][j][k] + U2NCON[i - 1][j][k] - U21[i][j][k];
-						U3N = U3NCON[i][j][k] + U3NCON[i - 1][j][k] - U31[i][j][k];
+						tn = tnCon[i][j][k] + tnCon[i - 1][j][k] - t1[i][j][k];
+						u2n = u2nCon[i][j][k] + u2nCon[i - 1][j][k] - u21[i][j][k];
+						u3n = u3nCon[i][j][k] + u3nCon[i - 1][j][k] - u31[i][j][k];
 					}
 				}
 
-				P1[i][j][k] = PN;
-				U11[i][j][k] = UN;
-				RO1[i][j][k] = RON;
-				T1[i][j][k] = TN;
-				U21[i][j][k] = U2N;
-				U31[i][j][k] = U3N;
+				p1[i][j][k] = pn;
+				u11[i][j][k] = un;
+				ro1[i][j][k] = ron;
+				t1[i][j][k] = tn;
+				u21[i][j][k] = u2n;
+				u31[i][j][k] = u3n;
 			}
 
 			// the flow variable calculations on the east border
-			P1[1][j][k] = P1[N1][j][k];
-			U11[1][j][k] = U11[N1][j][k];
-			RO1[1][j][k] = RO1[N1][j][k];
-			T1[1][j][k] = T1[N1][j][k];
-			U21[1][j][k] = U21[N1][j][k];
-			U31[1][j][k] = U31[N1][j][k];
+			p1[1][j][k] = p1[n1][j][k];
+			u11[1][j][k] = u11[n1][j][k];
+			ro1[1][j][k] = ro1[n1][j][k];
+			t1[1][j][k] = t1[n1][j][k];
+			u21[1][j][k] = u21[n1][j][k];
+			u31[1][j][k] = u31[n1][j][k];
 		}
 	}
 
@@ -838,255 +838,255 @@ void Phase2()
 
 	// bypassing along the X2 axis
 
-	double XLE, XLW, XLS;
+	double xle, xlw, xls;
 
-	double U1FN, U1BN;
+	double u1fn, u1bn;
 
-	double GU1;
+	double gu1;
 
-	double U1MAX, U1MIN, U1N;
+	double u1max, u1min, u1n;
 
-	for (int k = 1; k < N3; k++)
+	for (int k = 1; k < n3; k++)
 	{
-		for (int i = 1; i < N1; i++)
+		for (int i = 1; i < n1; i++)
 		{
-			XLE = 1 + (L - 1)*(X1[i + 1] - 1);
-			XLW = 1 + (L - 1)*(X1[i] - 1);
-			XLS = 0.5*(XLE + XLW);
+			xle = 1 + (l - 1)*(x1[i + 1] - 1);
+			xlw = 1 + (l - 1)*(x1[i] - 1);
+			xls = 0.5*(xle + xlw);
 			
-			for (int j = 0; j <= N2; j++)
+			for (int j = 0; j <= n2; j++)
 			{
-				U2F = U22[i][j + 1][k];
-				U2B = U22[i][j][k];
-				U2CN = U2NCON[i][j][k];
-				U2C = U2CON[i][j][k];
+				u2f = u22[i][j + 1][k];
+				u2b = u22[i][j][k];
+				u2cn = u2nCon[i][j][k];
+				u2c = u2Con[i][j][k];
 
-				U1F = U12[i][j + 1][k];
-				U1B = U12[i][j][k];
-				U1CN = U1NCON[i][j][k];
-				U1C = U1CON[i][j][k];
+				u1f = u12[i][j + 1][k];
+				u1b = u12[i][j][k];
+				u1cn = u1nCon[i][j][k];
+				u1c = u1Con[i][j][k];
 
-				U3F = U32[i][j + 1][k];
-				U3B = U32[i][j][k];
-				U3CN = U3NCON[i][j][k];
-				U3C = U3CON[i][j][k];
+				u3f = u32[i][j + 1][k];
+				u3b = u32[i][j][k];
+				U3CN = u3nCon[i][j][k];
+				u3c = u3Con[i][j][k];
 
-				ROF = RO2[i][j + 1][k];
-				ROB = RO2[i][j][k];
-				ROCN = RONCON[i][j][k];
-				ROC = ROCON[i][j][k];
+				rof = ro2[i][j + 1][k];
+				rob = ro2[i][j][k];
+				rocn = ronCon[i][j][k];
+				roc = roCon[i][j][k];
 
-				TF = T2[i][j + 1][k];
-				TB = T2[i][j][k];
-				TCN = TNCON[i][j][k];
-				TC = TCON[i][j][k];
+				tf = t2[i][j + 1][k];
+				tb = t2[i][j][k];
+				tcn = tnCon[i][j][k];
+				tc = tCon[i][j][k];
 
-				PF = P2[i][j + 1][k];
-				PB = P2[i][j][k];
-				PCN = SOUND*SOUND*(ROCN - RO0G);
-				PC = SOUND*SOUND*(ROC - RO0G);
+				pf = p2[i][j + 1][k];
+				pb = p2[i][j][k];
+				pcn = sound*sound*(rocn - ro0_g);
+				pc = sound*sound*(roc - ro0_g);
 
 				// invariant calculation
-				RF = U2F + PF / (RO0G*SOUND);
-				RB = U2B + PB / (RO0G*SOUND);
-				RCN = U2CN + PCN / (RO0G*SOUND);
-				RC = U2C + PC / (RO0G*SOUND);
+				rf = u2f + pf / (ro0_g*sound);
+				rb = u2b + pb / (ro0_g*sound);
+				rcn = u2cn + pcn / (ro0_g*sound);
+				rc = u2c + pc / (ro0_g*sound);
 
-				RFN = 2 * RCN - RB;
+				rfn = 2 * rcn - rb;
 
-				QF = U2F - PF / (RO0G*SOUND);
-				QB = U2B - PB / (RO0G*SOUND);
-				QCN = U2CN - PCN / (RO0G*SOUND);
-				QC = U2C - PC / (RO0G*SOUND);
+				qf = u2f - pf / (ro0_g*sound);
+				qb = u2b - pb / (ro0_g*sound);
+				QCN = u2cn - pcn / (ro0_g*sound);
+				qc = u2c - pc / (ro0_g*sound);
 
-				QBN = 2 * QCN - QF;
+				qbn = 2 * QCN - qf;
 
-				TFN = 2 * TCN - TB;
-				TBN = 2 * TCN - TF;
+				tfn = 2 * tcn - tb;
+				tbn = 2 * tcn - tf;
 
-				U1FN = 2 * U1CN - U1B;
-				U1BN = 2 * U1CN - U1F;
+				u1fn = 2 * u1cn - u1b;
+				u1bn = 2 * u1cn - u1f;
 
-				U3FN = 2 * U3CN - U3B;
-				U3BN = 2 * U3CN - U3F;
+				U3FN = 2 * U3CN - u3b;
+				U3BN = 2 * U3CN - u3f;
 
 				// the permissible range of changes
-				GR = 2 * (RCN - RC) / DT + (U2CN + SOUND)*(RF - RB) / DX2 / XLS;
-				GQ = 2 * (QCN - QC) / DT + (U2CN - SOUND)*(QF - QB) / DX2 / XLS;
-				GT = 2 * (TCN - TC) / DT + U2CN*(TF - TB) / DX2 / XLS;
-				GU1 = 2 * (U1CN - U1C) / DT + U2CN*(U1F - U1B) / DX2 / XLS;
-				GU3 = 2 * (U3CN - U3C) / DT + U2CN*(U3F - U3B) / DX2 / XLS;
+				gr = 2 * (rcn - rc) / dt + (u2cn + sound)*(rf - rb) / dx2 / xls;
+				gq = 2 * (QCN - qc) / dt + (u2cn - sound)*(qf - qb) / dx2 / xls;
+				gt = 2 * (tcn - tc) / dt + u2cn*(tf - tb) / dx2 / xls;
+				gu1 = 2 * (u1cn - u1c) / dt + u2cn*(u1f - u1b) / dx2 / xls;
+				gu3 = 2 * (U3CN - u3c) / dt + u2cn*(u3f - u3b) / dx2 / xls;
 
-				// RMAX=MAX(RF,RC,RB) +DT*GR
-				RMAX = RF > RC ? RF : RC;
-				RMAX = RMAX > RB ? RMAX : RB;
-				RMAX += DT*GR;
+				// RMAX=MAX(RF,RC,RB) +dt*GR
+				rmax = rf > rc ? rf : rc;
+				rmax = rmax > rb ? rmax : rb;
+				rmax += dt*gr;
 
-				// RMIN=MIN(RF,RC,RB) +DT*GR
-				RMIN = RF < RC ? RF : RC;
-				RMIN = RMIN < RB ? RMIN : RB;
-				RMIN += DT*GR;
+				// RMIN=MIN(RF,RC,RB) +dt*GR
+				rmin = rf < rc ? rf : rc;
+				rmin = rmin < rb ? rmin : rb;
+				rmin += dt*gr;
 
-				// QMAX=MAX(QF,QC,QB) +DT*GQ
-				QMAX = QF > QC ? QF : QC;
-				QMAX = QMAX > QB ? QMAX : QB;
-				QMAX += DT*GQ;
+				// QMAX=MAX(QF,QC,QB) +dt*GQ
+				qmax = qf > qc ? qf : qc;
+				qmax = qmax > qb ? qmax : qb;
+				qmax += dt*gq;
 
-				// QMIN=MIN(QF,QC,QB) +DT*GQ
-				QMIN = QF < QC ? QF : QC;
-				QMIN = QMIN < QB ? QMIN : QB;
-				QMIN += DT*GQ;
+				// QMIN=MIN(QF,QC,QB) +dt*GQ
+				qmin = qf < qc ? qf : qc;
+				qmin = qmin < qb ? qmin : qb;
+				qmin += dt*gq;
 
-				// TMAX=MAX(TF,TC,TB) +DT*GT
-				TMAX = TF > TC ? TF : TC;
-				TMAX = TMAX > TB ? TMAX : TB;
-				TMAX += DT*GT;
+				// TMAX=MAX(TF,TC,TB) +dt*GT
+				tmax = tf > tc ? tf : tc;
+				tmax = tmax > tb ? tmax : tb;
+				tmax += dt*gt;
 
-				// TMIN=MIN(TF,TC,TB) +DT*GT
-				TMIN = TF < TC ? TF : TC;
-				TMIN = TMIN < TB ? TMIN : TB;
-				TMIN += DT*GT;
+				// TMIN=MIN(TF,TC,TB) +dt*GT
+				tmin = tf < tc ? tf : tc;
+				tmin = tmin < tb ? tmin : tb;
+				tmin += dt*gt;
 
-				// U1MAX=MAX(U1F,U1C,U1B) +DT*GU1
-				U1MAX = U1F > U1C ? U1F : U1C;
-				U1MAX = U1MAX > U1B ? U1MAX : U1B;
-				U1MAX += DT*GU1;
+				// U1MAX=MAX(U1F,U1C,U1B) +dt*GU1
+				u1max = u1f > u1c ? u1f : u1c;
+				u1max = u1max > u1b ? u1max : u1b;
+				u1max += dt*gu1;
 
-				// U1MIN=MIN(U1F,U1C,U1B) +DT*GU1
-				U1MIN = U1F < U1C ? U1F : U1C;
-				U1MIN = U1MIN < U1B ? U1MIN : U1B;
-				U1MIN += DT*GU1;
+				// U1MIN=MIN(U1F,U1C,U1B) +dt*GU1
+				u1min = u1f < u1c ? u1f : u1c;
+				u1min = u1min < u1b ? u1min : u1b;
+				u1min += dt*gu1;
 
-				// U3MAX=MAX(U3F,U3C,U3B) +DT*GU3
-				U3MAX = U3F > U3C ? U3F : U3C;
-				U3MAX = U3MAX > U3B ? U3MAX : U3B;
-				U3MAX += DT*GU3;
+				// U3MAX=MAX(U3F,U3C,U3B) +dt*GU3
+				u3max = u3f > u3c ? u3f : u3c;
+				u3max = u3max > u3b ? u3max : u3b;
+				u3max += dt*gu3;
 
-				// U3MIN=MIN(U3F,U3C,U3B) +DT*GU3 
-				U3MIN = U3F < U3C ? U3F : U3C;
-				U3MIN = U3MIN < U3B ? U3MIN : U3B;
-				U3MIN += DT*GU3;
+				// U3MIN=MIN(U3F,U3C,U3B) +dt*GU3 
+				u3min = u3f < u3c ? u3f : u3c;
+				u3min = u3min < u3b ? u3min : u3b;
+				u3min += dt*gu3;
 
 				// invariants correction
-				if (RFN > RMAX) RFN = RMAX;
-				if (RFN < RMIN) RFN = RMIN;
+				if (rfn > rmax) rfn = rmax;
+				if (rfn < rmin) rfn = rmin;
 
-				if (QBN > QMAX) QBN = QMAX;
-				if (QBN < QMIN) QBN = QMIN;
+				if (qbn > qmax) qbn = qmax;
+				if (qbn < qmin) qbn = qmin;
 
-				if (TFN > TMAX) TFN = TMAX;
-				if (TFN < TMIN) TFN = TMIN;
+				if (tfn > tmax) tfn = tmax;
+				if (tfn < tmin) tfn = tmin;
 
-				if (TBN > TMAX) TBN = TMAX;
-				if (TBN < TMIN) TBN = TMIN;
+				if (tbn > tmax) tbn = tmax;
+				if (tbn < tmin) tbn = tmin;
 
-				if (U1FN > U1MAX) U1FN = U1MAX;
-				if (U1FN < U1MIN) U1FN = U1MIN;
+				if (u1fn > u1max) u1fn = u1max;
+				if (u1fn < u1min) u1fn = u1min;
 
-				if (U1BN > U1MAX) U1BN = U1MAX;
-				if (U1BN < U1MIN) U1BN = U1MIN;
+				if (u1bn > u1max) u1bn = u1max;
+				if (u1bn < u1min) u1bn = u1min;
 
-				if (U3FN > U3MAX) U3FN = U3MAX;
-				if (U3FN < U3MIN) U3FN = U3MIN;
+				if (U3FN > u3max) U3FN = u3max;
+				if (U3FN < u3min) U3FN = u3min;
 
-				if (U3BN > U3MAX) U3BN = U3MAX;
-				if (U3BN < U3MIN) U3BN = U3MIN;
+				if (U3BN > u3max) U3BN = u3max;
+				if (U3BN < u3min) U3BN = u3min;
 
 				// put invariants to buffers
-				RBUF[j + 1] = RFN;
-				QBUF[j] = QBN;
-				TFBUF[j + 1] = TFN;
-				TBBUF[j] = TBN;
-				U2FBUF[j + 1] = U1FN;
-				U2BBUF[j] = U1BN;
-				U3FBUF[j + 1] = U3FN;
-				U3BBUF[j] = U3BN;
+				rBuf[j + 1] = rfn;
+				qBuf[j] = qbn;
+				tfBuf[j + 1] = tfn;
+				tbBuf[j] = tbn;
+				u2fBuf[j + 1] = u1fn;
+				u2bBuf[j] = u1bn;
+				u3fBuf[j + 1] = U3FN;
+				u3bBuf[j] = U3BN;
 			}
 
 			// boundary conditions along the X2 axis
 			// assignment of boundary invatiants and add them to the buffer arrays
 
 			// periodicity conditions
-			RBUF[1] = RBUF[N2];
-			TFBUF[1] = TFBUF[N2];
-			U2FBUF[1] = U2FBUF[N2];
-			U3FBUF[1] = U3FBUF[N2];
+			rBuf[1] = rBuf[n2];
+			tfBuf[1] = tfBuf[n2];
+			u2fBuf[1] = u2fBuf[n2];
+			u3fBuf[1] = u3fBuf[n2];
 
 			// periodicity conditions
-			QBUF[N2] = QBUF[1];
-			TBBUF[N2] = TBBUF[1];
-			U2BBUF[N2] = U2BBUF[1];
-			U3BBUF[N2] = U3BBUF[1];
+			qBuf[n2] = qBuf[1];
+			tbBuf[n2] = tbBuf[1];
+			u2bBuf[n2] = u2bBuf[1];
+			u3bBuf[n2] = u3bBuf[1];
 
 			// the flow variables calculations
-			for (int j = 1; j <= N2; j++)
+			for (int j = 1; j <= n2; j++)
 			{
-				RO0B = RONCON[i][j - 1][k];
-				RO0F = RONCON[i][j][k];
+				ro0b = ronCon[i][j - 1][k];
+				ro0f = ronCon[i][j][k];
 
-				RN = RBUF[j];
-				QN = QBUF[j];
+				rn = rBuf[j];
+				qn = qBuf[j];
 
-				PN = (RN - QN)*SOUND*RO0G / 2;
-				UN = (RN + QN) / 2;
+				pn = (rn - qn)*sound*ro0_g / 2;
+				un = (rn + qn) / 2;
 
-				RON = (RO0G + PN / (SOUND*SOUND));
+				ron = (ro0_g + pn / (sound*sound));
 
-				UCF = U2NCON[i][j][k];
-				UCB = U2NCON[i][j - 1][k];
+				ucf = u2nCon[i][j][k];
+				ucb = u2nCon[i][j - 1][k];
 
-				if (UCF >= 0 && UCB > 0)
+				if (ucf >= 0 && ucb > 0)
 				{
-					TN = TFBUF[j];
-					U1N = U2FBUF[j];
-					U3N = U3FBUF[j];
+					tn = tfBuf[j];
+					u1n = u2fBuf[j];
+					u3n = u3fBuf[j];
 				}
-				else if (UCF <= 0 && UCB <= 0)
+				else if (ucf <= 0 && ucb <= 0)
 				{
-					TN = TBBUF[j];
-					U1N = U2BBUF[j];
-					U3N = U3BBUF[j];
+					tn = tbBuf[j];
+					u1n = u2bBuf[j];
+					u3n = u3bBuf[j];
 				}
-				else if (UCB >= 0 && UCF <= 0)
+				else if (ucb >= 0 && ucf <= 0)
 				{
-					if (UCB > -UCF)
+					if (ucb > -ucf)
 					{
-						TN = TFBUF[j];
-						U1N = U2FBUF[j];
-						U3N = U3FBUF[j];
+						tn = tfBuf[j];
+						u1n = u2fBuf[j];
+						u3n = u3fBuf[j];
 					}
 					else
 					{
-						TN = TBBUF[j];
-						U1N = U2BBUF[j];
-						U3N = U3BBUF[j];
+						tn = tbBuf[j];
+						u1n = u2bBuf[j];
+						u3n = u3bBuf[j];
 					}
 				}
 				else
 				{
-					if (UCB <= 0 && UCF >= 0)
+					if (ucb <= 0 && ucf >= 0)
 					{
-						TN = TNCON[i][j][k] + TNCON[i][j - 1][k] - T2[i][j][k];
-						U1N = U1NCON[i][j][k] + U1NCON[i][j - 1][k] - U12[i][j][k];
-						U3N = U3NCON[i][j][k] + U3NCON[i][j - 1][k] - U32[i][j][k];
+						tn = tnCon[i][j][k] + tnCon[i][j - 1][k] - t2[i][j][k];
+						u1n = u1nCon[i][j][k] + u1nCon[i][j - 1][k] - u12[i][j][k];
+						u3n = u3nCon[i][j][k] + u3nCon[i][j - 1][k] - u32[i][j][k];
 					}
 				}
 
-				P2[i][j][k] = PN;
-				U22[i][j][k] = UN;
-				RO2[i][j][k] = RON;
-				T2[i][j][k] = TN;
-				U12[i][j][k] = U1N;
-				U32[i][j][k] = U3N;
+				p2[i][j][k] = pn;
+				u22[i][j][k] = un;
+				ro2[i][j][k] = ron;
+				t2[i][j][k] = tn;
+				u12[i][j][k] = u1n;
+				u32[i][j][k] = u3n;
 			}
 
 			// the flow variable calculations on the south border
-			P2[i][1][k] = P2[i][N2][k];
-			U22[i][1][k] = U22[i][N2][k];
-			RO2[i][1][k] = RO2[i][N2][k];
-			T2[i][1][k] = T2[i][N2][k];
-			U12[i][1][k] = U12[i][N2][k];
-			U32[i][1][k] = U32[i][N2][k];
+			p2[i][1][k] = p2[i][n2][k];
+			u22[i][1][k] = u22[i][n2][k];
+			ro2[i][1][k] = ro2[i][n2][k];
+			t2[i][1][k] = t2[i][n2][k];
+			u12[i][1][k] = u12[i][n2][k];
+			u32[i][1][k] = u32[i][n2][k];
 		}
 	}
 
@@ -1094,274 +1094,274 @@ void Phase2()
 
 	// bypassing along the X3 axis
 
-	for (int j = 1; j < N2; j++)
+	for (int j = 1; j < n2; j++)
 	{
-		for (int i = 1; i < N1; i++)
+		for (int i = 1; i < n1; i++)
 		{
-			for (int k = 1; k < N3; k++)
+			for (int k = 1; k < n3; k++)
 			{
-				U3F = U33[i][j][k + 1];
-				U3B = U33[i][j][k];
-				U3CN = U3NCON[i][j][k];
-				U3C = U3CON[i][j][k];
+				u3f = u33[i][j][k + 1];
+				u3b = u33[i][j][k];
+				U3CN = u3nCon[i][j][k];
+				u3c = u3Con[i][j][k];
 
-				U2F = U23[i][j][k + 1];
-				U2B = U23[i][j][k];
-				U2CN = U2NCON[i][j][k];
-				U2C = U2CON[i][j][k];
+				u2f = u23[i][j][k + 1];
+				u2b = u23[i][j][k];
+				u2cn = u2nCon[i][j][k];
+				u2c = u2Con[i][j][k];
 
-				U1F = U13[i][j][k + 1];
-				U1B = U13[i][j][k];
-				U1CN = U1NCON[i][j][k];
-				U1C = U1CON[i][j][k];
+				u1f = u13[i][j][k + 1];
+				u1b = u13[i][j][k];
+				u1cn = u1nCon[i][j][k];
+				u1c = u1Con[i][j][k];
 
-				ROF = RO3[i][j][k + 1];
-				ROB = RO3[i][j][k];
-				ROCN = RONCON[i][j][k];
-				ROC = ROCON[i][j][k];
+				rof = ro3[i][j][k + 1];
+				rob = ro3[i][j][k];
+				rocn = ronCon[i][j][k];
+				roc = roCon[i][j][k];
 
-				TF = T3[i][j][k + 1];
-				TB = T3[i][j][k];
-				TCN = TNCON[i][j][k];
-				TC = TCON[i][j][k];
+				tf = t3[i][j][k + 1];
+				tb = t3[i][j][k];
+				tcn = tnCon[i][j][k];
+				tc = tCon[i][j][k];
 
-				PF = P3[i][j][k + 1];
-				PB = P3[i][j][k];
-				PCN = SOUND*SOUND*(ROCN - RO0G);
-				PC = SOUND*SOUND*(ROC - RO0G);
+				pf = p3[i][j][k + 1];
+				pb = p3[i][j][k];
+				pcn = sound*sound*(rocn - ro0_g);
+				pc = sound*sound*(roc - ro0_g);
 
 				// invariant calculation
-				RF = U3F + PF / (RO0G*SOUND);
-				RB = U3B + PB / (RO0G*SOUND);
-				RCN = U3CN + PCN / (RO0G*SOUND);
-				RC = U3C + PC / (RO0G*SOUND);
+				rf = u3f + pf / (ro0_g*sound);
+				rb = u3b + pb / (ro0_g*sound);
+				rcn = U3CN + pcn / (ro0_g*sound);
+				rc = u3c + pc / (ro0_g*sound);
 
-				RFN = 2 * RCN - RB;
+				rfn = 2 * rcn - rb;
 
-				QF = U3F - PF / (RO0G*SOUND);
-				QB = U3B - PB / (RO0G*SOUND);
-				QCN = U3CN - PCN / (RO0G*SOUND);
-				QC = U3C - PC / (RO0G*SOUND);
+				qf = u3f - pf / (ro0_g*sound);
+				qb = u3b - pb / (ro0_g*sound);
+				QCN = U3CN - pcn / (ro0_g*sound);
+				qc = u3c - pc / (ro0_g*sound);
 
-				QBN = 2 * QCN - QF;
+				qbn = 2 * QCN - qf;
 
-				TFN = 2 * TCN - TB;
-				TBN = 2 * TCN - TF;
+				tfn = 2 * tcn - tb;
+				tbn = 2 * tcn - tf;
 
-				U2FN = 2 * U2CN - U2B;
-				U2BN = 2 * U2CN - U2F;
+				u2fn = 2 * u2cn - u2b;
+				u2bn = 2 * u2cn - u2f;
 
-				U1FN = 2 * U1CN - U1B;
-				U1BN = 2 * U1CN - U1F;
+				u1fn = 2 * u1cn - u1b;
+				u1bn = 2 * u1cn - u1f;
 
 				// the permissible range of changes
-				GR = 2 * (RCN - RC) / DT + (U3CN + SOUND)*(RF - RB) / DX3;
-				GQ = 2 * (RCN - RC) / DT + (U3CN - SOUND)*(QF - QB) / DX3;
+				gr = 2 * (rcn - rc) / dt + (U3CN + sound)*(rf - rb) / dx3;
+				gq = 2 * (rcn - rc) / dt + (U3CN - sound)*(qf - qb) / dx3;
 
-				GT = 2 * (TCN - TC) / DT + U3CN*(TF - TB) / DX3;
-				GU2 = 2 * (U2CN - U2C) / DT + U3CN*(U2F - U2B) / DX3;
-				GU1 = 2 * (U1CN - U1C) / DT + U3CN*(U1F - U1B) / DX3;
+				gt = 2 * (tcn - tc) / dt + U3CN*(tf - tb) / dx3;
+				gu2 = 2 * (u2cn - u2c) / dt + U3CN*(u2f - u2b) / dx3;
+				gu1 = 2 * (u1cn - u1c) / dt + U3CN*(u1f - u1b) / dx3;
 
-				// RMAX=MAX(RF,RC,RB) +DT*GR
-				RMAX = RF > RC ? RF : RC;
-				RMAX = RMAX > RB ? RMAX : RB;
-				RMAX += DT*GR;
+				// RMAX=MAX(RF,RC,RB) +dt*GR
+				rmax = rf > rc ? rf : rc;
+				rmax = rmax > rb ? rmax : rb;
+				rmax += dt*gr;
 
-				// RMIN=MIN(RF,RC,RB) +DT*GR
-				RMIN = RF < RC ? RF : RC;
-				RMIN = RMIN < RB ? RMIN : RB;
-				RMIN += DT*GR;
+				// RMIN=MIN(RF,RC,RB) +dt*GR
+				rmin = rf < rc ? rf : rc;
+				rmin = rmin < rb ? rmin : rb;
+				rmin += dt*gr;
 
-				// QMAX=MAX(QF,QC,QB) +DT*GQ
-				QMAX = QF > QC ? QF : QC;
-				QMAX = QMAX > QB ? QMAX : QB;
-				QMAX += DT*GQ;
+				// QMAX=MAX(QF,QC,QB) +dt*GQ
+				qmax = qf > qc ? qf : qc;
+				qmax = qmax > qb ? qmax : qb;
+				qmax += dt*gq;
 
-				// QMIN=MIN(QF,QC,QB) +DT*GQ
-				QMIN = QF < QC ? QF : QC;
-				QMIN = QMIN < QB ? QMIN : QB;
-				QMIN += DT*GQ;
+				// QMIN=MIN(QF,QC,QB) +dt*GQ
+				qmin = qf < qc ? qf : qc;
+				qmin = qmin < qb ? qmin : qb;
+				qmin += dt*gq;
 
-				// TMAX=MAX(TF,TC,TB) +DT*GT
-				TMAX = TF > TC ? TF : TC;
-				TMAX = TMAX > TB ? TMAX : TB;
-				TMAX += DT*GT;
+				// TMAX=MAX(TF,TC,TB) +dt*GT
+				tmax = tf > tc ? tf : tc;
+				tmax = tmax > tb ? tmax : tb;
+				tmax += dt*gt;
 
-				// TMIN=MIN(TF,TC,TB) +DT*GT
-				TMIN = TF < TC ? TF : TC;
-				TMIN = TMIN < TB ? TMIN : TB;
-				TMIN += DT*GT;
+				// TMIN=MIN(TF,TC,TB) +dt*GT
+				tmin = tf < tc ? tf : tc;
+				tmin = tmin < tb ? tmin : tb;
+				tmin += dt*gt;
 
-				// U2MAX=MAX(U2F,U2C,U2B) +DT*GU2
-				U2MAX = U2F > U2C ? U2F : U2C;
-				U2MAX = U2MAX > U2B ? U2MAX : U2B;
-				U2MAX += DT*GU2;
+				// U2MAX=MAX(U2F,U2C,U2B) +dt*GU2
+				U2MAX = u2f > u2c ? u2f : u2c;
+				U2MAX = U2MAX > u2b ? U2MAX : u2b;
+				U2MAX += dt*gu2;
 
-				// U2MIN=MIN(U2F,U2C,U2B) +DT*GU2
-				U2MIN = U2F < U2C ? U2F : U2C;
-				U2MIN = U2MIN < U2B ? U2MIN : U2B;
-				U2MIN += DT*GU2;
+				// U2MIN=MIN(U2F,U2C,U2B) +dt*GU2
+				U2MIN = u2f < u2c ? u2f : u2c;
+				U2MIN = U2MIN < u2b ? U2MIN : u2b;
+				U2MIN += dt*gu2;
 
-				// U1MAX=MAX(U1F,U1C,U1B) +DT*GU1
-				U1MAX = U1F > U1C ? U1F : U1C;
-				U1MAX = U1MAX > U1B ? U1MAX : U1B;
-				U1MAX += DT*GU1;
+				// U1MAX=MAX(U1F,U1C,U1B) +dt*GU1
+				u1max = u1f > u1c ? u1f : u1c;
+				u1max = u1max > u1b ? u1max : u1b;
+				u1max += dt*gu1;
 
-				// U1MIN=MIN(U1F,U1C,U1B) +DT*GU1 
-				U1MIN = U1F < U1C ? U1F : U1C;
-				U1MIN = U1MIN < U1B ? U1MIN : U1B;
-				U1MIN += DT*GU1;
+				// U1MIN=MIN(U1F,U1C,U1B) +dt*GU1 
+				u1min = u1f < u1c ? u1f : u1c;
+				u1min = u1min < u1b ? u1min : u1b;
+				u1min += dt*gu1;
 
 				// invariants correction
-				if (RFN > RMAX) RFN = RMAX;
-				if (RFN < RMIN) RFN = RMIN;
+				if (rfn > rmax) rfn = rmax;
+				if (rfn < rmin) rfn = rmin;
 
-				if (QBN > QMAX) QBN = QMAX;
-				if (QBN < QMIN) QBN = QMIN;
+				if (qbn > qmax) qbn = qmax;
+				if (qbn < qmin) qbn = qmin;
 
-				if (TFN > TMAX) TFN = TMAX;
-				if (TFN < TMIN) TFN = TMIN;
+				if (tfn > tmax) tfn = tmax;
+				if (tfn < tmin) tfn = tmin;
 
-				if (TBN > TMAX) TBN = TMAX;
-				if (TBN < TMIN) TBN = TMIN;
+				if (tbn > tmax) tbn = tmax;
+				if (tbn < tmin) tbn = tmin;
 
-				if (U2FN > U2MAX) U2FN = U2MAX;
-				if (U2FN < U2MIN) U2FN = U2MIN;
+				if (u2fn > U2MAX) u2fn = U2MAX;
+				if (u2fn < U2MIN) u2fn = U2MIN;
 
-				if (U2BN > U2MAX) U2BN = U2MAX;
-				if (U2BN < U2MIN) U2BN = U2MIN;
+				if (u2bn > U2MAX) u2bn = U2MAX;
+				if (u2bn < U2MIN) u2bn = U2MIN;
 
-				if (U1FN > U1MAX) U1FN = U1MAX;
-				if (U1FN < U1MIN) U1FN = U1MIN;
+				if (u1fn > u1max) u1fn = u1max;
+				if (u1fn < u1min) u1fn = u1min;
 
-				if (U1BN > U1MAX) U1BN = U1MAX;
-				if (U1BN < U1MIN) U1BN = U1MIN;
+				if (u1bn > u1max) u1bn = u1max;
+				if (u1bn < u1min) u1bn = u1min;
 
 				// put invariants to buffers
-				RBUF[k + 1] = RFN;
-				QBUF[k] = QBN;
-				TFBUF[k + 1] = TFN;
-				TBBUF[k] = TBN;
-				U2FBUF[k + 1] = U1FN;
-				U2BBUF[k] = U1BN;
-				U3FBUF[k + 1] = U1FN;
-				U3BBUF[k] = U1BN;
+				rBuf[k + 1] = rfn;
+				qBuf[k] = qbn;
+				tfBuf[k + 1] = tfn;
+				tbBuf[k] = tbn;
+				u2fBuf[k + 1] = u1fn;
+				u2bBuf[k] = u1bn;
+				u3fBuf[k + 1] = u1fn;
+				u3bBuf[k] = u1bn;
 			}
 
 			// boundary conditions along the X3 axis
 			// assignment of boundary invatiants and add them to the buffer arrays
 
 			// periodicity conditions
-			RBUF[1] = RBUF[N3];
-			TFBUF[1] = TFBUF[N3];
-			U2FBUF[1] = U2FBUF[N3];
-			U3FBUF[1] = U3FBUF[N3];
+			rBuf[1] = rBuf[n3];
+			tfBuf[1] = tfBuf[n3];
+			u2fBuf[1] = u2fBuf[n3];
+			u3fBuf[1] = u3fBuf[n3];
 
 			// periodicity conditions
-			QBUF[N3] = QBUF[1];
-			TBBUF[N3] = TBBUF[1];
-			U2BBUF[N3] = U2BBUF[1];
-			U3BBUF[N3] = U3BBUF[1];
+			qBuf[n3] = qBuf[1];
+			tbBuf[n3] = tbBuf[1];
+			u2bBuf[n3] = u2bBuf[1];
+			u3bBuf[n3] = u3bBuf[1];
 
 			// the flow variables calculations
-			for (int k = 1; k <= N3; k++)
+			for (int k = 1; k <= n3; k++)
 			{
-				RO0B = RONCON[i][j][k - 1];
-				RO0F = RONCON[i][j][k];
+				ro0b = ronCon[i][j][k - 1];
+				ro0f = ronCon[i][j][k];
 
-				RN = RBUF[k];
-				QN = QBUF[k];
+				rn = rBuf[k];
+				qn = qBuf[k];
 
-				PN = (RN - QN)*SOUND*RO0G / 2;
-				UN = (RN + QN) / 2;
+				pn = (rn - qn)*sound*ro0_g / 2;
+				un = (rn + qn) / 2;
 
-				RON = (RO0G + PN / (SOUND*SOUND));
+				ron = (ro0_g + pn / (sound*sound));
 
-				UCF = U3NCON[i][j][k];
-				UCB = U3NCON[i][j][k - 1];
+				ucf = u3nCon[i][j][k];
+				ucb = u3nCon[i][j][k - 1];
 
-				if (UCF >= 0 && UCB > 0)
+				if (ucf >= 0 && ucb > 0)
 				{
-					TN = TFBUF[j];
-					U2N = U2FBUF[j];
-					U1N = U3FBUF[j];
+					tn = tfBuf[j];
+					u2n = u2fBuf[j];
+					u1n = u3fBuf[j];
 				}
-				else if (UCF <= 0 && UCB <= 0)
+				else if (ucf <= 0 && ucb <= 0)
 				{
-					TN = TBBUF[j];
-					U2N = U2BBUF[j];
-					U1N = U3BBUF[j];
+					tn = tbBuf[j];
+					u2n = u2bBuf[j];
+					u1n = u3bBuf[j];
 				}
-				else if (UCB >= 0 && UCF <= 0)
+				else if (ucb >= 0 && ucf <= 0)
 				{
-					if (UCB > -UCF)
+					if (ucb > -ucf)
 					{
-						TN = TFBUF[j];
-						U2N = U2FBUF[j];
-						U1N = U3FBUF[j];
+						tn = tfBuf[j];
+						u2n = u2fBuf[j];
+						u1n = u3fBuf[j];
 					}
 					else
 					{
-						TN = TBBUF[j];
-						U2N = U2BBUF[j];
-						U1N = U3BBUF[j];
+						tn = tbBuf[j];
+						u2n = u2bBuf[j];
+						u1n = u3bBuf[j];
 					}
 				}
 				else
 				{
-					if (UCB <= 0 && UCF >= 0)
+					if (ucb <= 0 && ucf >= 0)
 					{
-						TN = TNCON[i][j][k] + TNCON[i][j][k - 1] - T3[i][j][k];
-						U2N = U2NCON[i][j][k] + U2NCON[i][j][k - 1] - U23[i][j][k];
-						U1N = U1NCON[i][j][k] + U1NCON[i][j][k - 1] - U13[i][j][k];
+						tn = tnCon[i][j][k] + tnCon[i][j][k - 1] - t3[i][j][k];
+						u2n = u2nCon[i][j][k] + u2nCon[i][j][k - 1] - u23[i][j][k];
+						u1n = u1nCon[i][j][k] + u1nCon[i][j][k - 1] - u13[i][j][k];
 					}
 				}
 
-				P3[i][j][k] = PN;
-				U33[i][j][k] = UN;
-				RO3[i][j][k] = RON;
-				T3[i][j][k] = TN;
-				U23[i][j][k] = U2N;
-				U13[i][j][k] = U1N;
+				p3[i][j][k] = pn;
+				u33[i][j][k] = un;
+				ro3[i][j][k] = ron;
+				t3[i][j][k] = tn;
+				u23[i][j][k] = u2n;
+				u13[i][j][k] = u1n;
 			}
 
 			// the flow variable calculations on the bottom border
-			P3[i][j][1] = P3[i][j][N3];
-			U33[i][j][1] = U33[i][j][N3];
-			RO3[i][j][1] = RO3[i][j][N3];
-			T3[i][j][1] = T3[i][j][N3];
-			U23[i][j][1] = U23[i][j][N3];
-			U13[i][j][1] = U13[i][j][N3];
+			p3[i][j][1] = p3[i][j][n3];
+			u33[i][j][1] = u33[i][j][n3];
+			ro3[i][j][1] = ro3[i][j][n3];
+			t3[i][j][1] = t3[i][j][n3];
+			u23[i][j][1] = u23[i][j][n3];
+			u13[i][j][1] = u13[i][j][n3];
 
 			// inlet conditions
-			QN = QBUF[1];
-			RN = U3INLET + (RONCON[i][j][1] - RO0G)*SOUND / RO0G;
-			UN = (RN + QN) / 2;
-			PN = (RN - QN)*SOUND*RO0G / 2;
-			RON = RO0G + PN / SOUND / SOUND;
-			U2N = U2INLET;
-			U1N = U1INLET;
-			TN = TINLET;
-			P3[i][j][1] = PN;
-			U33[i][j][1] = UN;
-			RO3[i][j][1] = RON;
-			T3[i][j][1] = TN;
-			U23[i][j][1] = U2N;
-			U13[i][j][1] = U1N;
+			qn = qBuf[1];
+			rn = u3Inlet + (ronCon[i][j][1] - ro0_g)*sound / ro0_g;
+			un = (rn + qn) / 2;
+			pn = (rn - qn)*sound*ro0_g / 2;
+			ron = ro0_g + pn / sound / sound;
+			u2n = u2Inlet;
+			u1n = u1Inlet;
+			tn = tInlet;
+			p3[i][j][1] = pn;
+			u33[i][j][1] = un;
+			ro3[i][j][1] = ron;
+			t3[i][j][1] = tn;
+			u23[i][j][1] = u2n;
+			u13[i][j][1] = u1n;
 
 			// outlet conditions
-			RN = RBUF[N3];
-			PN = POUTLET;
-			UN = RN - PN / RO0G / SOUND;
-			TN = TFBUF[N3];
-			U2N = U2FBUF[N3];
-			U1N = U3FBUF[N3];
-			P3[i][j][N3] = PN;
-			U33[i][j][N3] = UN;
-			RO3[i][j][N3] = RON;
-			T3[i][j][N3] = TN;
-			U23[i][j][N3] = U2N;
-			U13[i][j][N3] = U1N;
+			rn = rBuf[n3];
+			pn = pOutlet;
+			un = rn - pn / ro0_g / sound;
+			tn = tfBuf[n3];
+			u2n = u2fBuf[n3];
+			u1n = u3fBuf[n3];
+			p3[i][j][n3] = pn;
+			u33[i][j][n3] = un;
+			ro3[i][j][n3] = ron;
+			t3[i][j][n3] = tn;
+			u23[i][j][n3] = u2n;
+			u13[i][j][n3] = u1n;
 		}
 	}
 }
@@ -1369,20 +1369,20 @@ void Phase2()
 void StressTensor()
 {
 	// initialization of friction stress arrays
-	for (int i = 0; i <= N1; ++i) {
-		for (int j = 0; j <= N2; ++j) {
-			for (int k = 0; k <= N3; ++k) {
-				SIGM11[i][j][k] = 0.0;
-				SIGM21[i][j][k] = 0.0;
-				SIGM31[i][j][k] = 0.0;
+	for (int i = 0; i <= n1; ++i) {
+		for (int j = 0; j <= n2; ++j) {
+			for (int k = 0; k <= n3; ++k) {
+				sigm11[i][j][k] = 0.0;
+				sigm21[i][j][k] = 0.0;
+				sigm31[i][j][k] = 0.0;
 
-				SIGM12[i][j][k] = 0.0;
-				SIGM22[i][j][k] = 0.0;
-				SIGM32[i][j][k] = 0.0;
+				sigm12[i][j][k] = 0.0;
+				sigm22[i][j][k] = 0.0;
+				sigm32[i][j][k] = 0.0;
 
-				SIGM13[i][j][k] = 0.0;
-				SIGM23[i][j][k] = 0.0;
-				SIGM33[i][j][k] = 0.0;
+				sigm13[i][j][k] = 0.0;
+				sigm23[i][j][k] = 0.0;
+				sigm33[i][j][k] = 0.0;
 			}
 		}
 	}
@@ -1391,19 +1391,19 @@ void StressTensor()
 	// 				boundary conditions
 	// #####################################################
 
-	// no-slip condition on the boundary faces perpendicular to X1
-	X1[0] = X1[1];
-	X1[N1+1] = X1[N1];
+	// no-slip condition on the boundary faces perpendicular to x1
+	x1[0] = x1[1];
+	x1[n1+1] = x1[n1];
 
-	for (int j = 1; j < N2 ; ++j) {
-		for (int k = 1; k < N3; ++k) {
-			U1CON[0][j][k] = 0.;
-			U2CON[0][j][k] = 0.;
-			U3CON[0][j][k] = 0.;
+	for (int j = 1; j < n2 ; ++j) {
+		for (int k = 1; k < n3; ++k) {
+			u1Con[0][j][k] = 0.;
+			u2Con[0][j][k] = 0.;
+			u3Con[0][j][k] = 0.;
 
-			U1CON[N1][j][k] = 0.;
-			U2CON[N1][j][k] = 0.;
-			U3CON[N1][j][k] = 0.;
+			u1Con[n1][j][k] = 0.;
+			u2Con[n1][j][k] = 0.;
+			u3Con[n1][j][k] = 0.;
 		}
 
 	}
@@ -1418,96 +1418,96 @@ void StressTensor()
 	// 				bypassing along the faces
 	// #####################################################
 
-	double XLE, XLW, XLT, XLN, U1C, U1CE, U2C, U2CE, U3C, U3CE;
+	double xle, xlw, xlt, xln, u1c, u1ce, u2c, u2ce, u3c, u3ce;
 
-	// bypassing along the face perpendicular to X1
-	for (int i = 1; i <= N1; ++i) {
-		for (int j = 1; j < N2; ++j) {
-			for (int k = 1; k < N3; ++k) {
+	// bypassing along the face perpendicular to x1
+	for (int i = 1; i <= n1; ++i) {
+		for (int j = 1; j < n2; ++j) {
+			for (int k = 1; k < n3; ++k) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
-				XLE = 1 + (L-1)*(X1[i] - 1);
+				xle = 1 + (l-1)*(x1[i] - 1);
 
 				// velocity components in cell centers
-				U1C = U1CON[i][j][k];
-				U1CE = U1CON[i-1][j][k];
+				u1c = u1Con[i][j][k];
+				u1ce = u1Con[i-1][j][k];
 
-				U2C = U2CON[i][j][k];
-				U2CE = U2CON[i][j][k];
+				u2c = u2Con[i][j][k];
+				u2ce = u2Con[i-1][j][k];
 
-				U3C = U3CON[i][j][k];
-				U3CE = U3CON[i-1][j][k];
+				u3c = u3Con[i][j][k];
+				u3ce = u3Con[i-1][j][k];
 
 				// friction stress
-				SIGM11[i][j][k]=-VIS*XLE*(U1CE-U1C)/DX1;
-				SIGM21[i][j][k]=-VIS*XLE*(U2CE-U2C)/DX1;
-				SIGM31[i][j][k]=-VIS*XLE*(U3CE-U3C)/DX1;
+				sigm11[i][j][k]=-VIS*xle*(u1ce-u1c)/dx1;
+				sigm21[i][j][k]=-VIS*xle*(u2ce-u2c)/dx1;
+				sigm31[i][j][k]=-VIS*xle*(u3ce-u3c)/dx1;
 			}
 		}
 	}
 
-	double U1CN, U2CN, U3CN;
+	double u1cn, u2cn, u3cn;
 
 	// bypassing along the face perpenditcular to X2
-	for (int i = 1; i < N1; ++i) {
-		for (int j = 1; j <= N2; ++j) {
-			for (int k = 1; k < N3; ++k) {
+	for (int i = 1; i < n1; ++i) {
+		for (int j = 1; j <= n2; ++j) {
+			for (int k = 1; k < n3; ++k) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
-				XLE = 1 + (L-1)*(X1[i] - 1);
+				xle = 1 + (l-1)*(x1[i] - 1);
 				// geometric factor of cylindricity
-				XLW = 1 + (L-1)*(X1[i-1] - 1);
+				xlw = 1 + (l-1)*(x1[i-1] - 1);
 				// geometric factor of cylindricity
-				XLT = 0.5*(XLE + XLW);
+				xlt = 0.5*(xle + xlw);
 				// geometric factor of cylindricity
-				XLN = XLT;
+				xln = xlt;
 
 				// velocity components in cell centers
-				U1C = U1CON[i][j][k];
-				U1CN = U1CON[i][j-1][k];
+				u1c = u1Con[i][j][k];
+				u1cn = u1Con[i][j-1][k];
 
-				U2C = U2CON[i][j][k];
-				U2CN = U2CON[i][j-1][k];
+				u2c = u2Con[i][j][k];
+				u2cn = u2Con[i][j-1][k];
 
-				U3C = U3CON[i][j][k];
-				U3CN = U3CON[i][j-1][k];
+				u3c = u3Con[i][j][k];
+				u3cn = u3Con[i][j-1][k];
 
 				// friction stress
-				SIGM12[i][j][k]=-VIS*((U1CN-U1C)/DX2 -(L-1)*(U2C+U2CN))/XLN;
-				SIGM22[i][j][k]=-VIS*((U2CN-U2C)/DX2 +(L-1)*(U1C+U1CN))/XLN;
-				SIGM32[i][j][k]=-VIS*(U3CN-U3C)/DX2;
+				sigm12[i][j][k]=-VIS*((u1cn-u1c)/dx2 -(l-1)*(u2c+u2cn))/xln;
+				sigm22[i][j][k]=-VIS*((u2cn-u2c)/dx2 +(l-1)*(u1c+u1cn))/xln;
+				sigm32[i][j][k]=-VIS*(u3cn-u3c)/dx2;
 			}
 		}
 	}
 
-	double U1CT, U2CT, U3CT;
+	double u1ct, u2ct, u3ct;
 
 	// bypassing along the face perpenditcular to X3
-	for (int i = 1; i < N1; ++i) {
-		for (int j = 1; j < N2; ++j) {
-			for (int k = 1; k <= N3; ++k) {
+	for (int i = 1; i < n1; ++i) {
+		for (int j = 1; j < n2; ++j) {
+			for (int k = 1; k <= n3; ++k) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
-				XLE = 1 + (L-1)*(X1[i] - 1);
+				xle = 1 + (l-1)*(x1[i] - 1);
 				// geometric factor of cylindricity
-				XLW = 1 + (L-1)*(X1[i-1] - 1);
+				xlw = 1 + (l-1)*(x1[i-1] - 1);
 				// geometric factor of cylindricity
-				XLT = 0.5*(XLE + XLW);
+				xlt = 0.5*(xle + xlw);
 
 				// velocity components in the cell centers
-				U1C = U1CON[i][j][k];
-				U1CT = U1CON[i][j][k-1];
+				u1c = u1Con[i][j][k];
+				u1ct = u1Con[i][j][k-1];
 
-				U2C = U2CON[i][j][k];
-				U2CT = U2CON[i][j][k-1];
+				u2c = u2Con[i][j][k];
+				u2ct = u2Con[i][j][k-1];
 
-				U3C = U3CON[i][j][k];
-				U3CT = U3CON[i][j][k-1];
+				u3c = u3Con[i][j][k];
+				u3ct = u3Con[i][j][k-1];
 
 				// friction stress
-				SIGM13[i][j][k]=-VIS*XLT*(U1CT-U1C)/DX3;
-				SIGM23[i][j][k]=-VIS*XLT*(U2CT-U2C)/DX3;
-				SIGM33[i][j][k]=-VIS*XLT*(U3CT-U3C)/DX3;
+				sigm13[i][j][k]=-VIS*xlt*(u1ct-u1c)/dx3;
+				sigm23[i][j][k]=-VIS*xlt*(u2ct-u2c)/dx3;
+				sigm33[i][j][k]=-VIS*xlt*(u3ct-u3c)/dx3;
 			}
 		}
 	}
@@ -1516,44 +1516,44 @@ void StressTensor()
 	// 				friction forces computation
 	// #####################################################
 
-	double DS1, DS2, DS3, SIGM1C, SIGM2C;
+	double ds1, ds2, ds3, sigm1c, sigm2c;
 
-	// area of the face perpendicuar to X1
-	DS1 = DX2*DX3;
-	DS2 = DX1*DX3;
-	DS3 = DX1*DX2;
+	// area of the face perpendicuar to x1
+	ds1 = dx2*dx3;
+	ds2 = dx1*dx3;
+	ds3 = dx1*dx2;
 
-	for (int i = 1; i < N1; ++i) {
-		for (int j = 1; j < N2; ++j) {
-			for (int k = 1; k < N3; ++k) {
+	for (int i = 1; i < n1; ++i) {
+		for (int j = 1; j < n2; ++j) {
+			for (int k = 1; k < n3; ++k) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
-				XLE = 1 + (L-1)*(X1[i] - 1);
+				xle = 1 + (l-1)*(x1[i] - 1);
 				// geometric factor of cylindricity
-				XLW = 1 + (L-1)*(X1[i-1] - 1);
+				xlw = 1 + (l-1)*(x1[i-1] - 1);
 				// geometric factor of cylindricity
-				XLT = 0.5*(XLE + XLW);
+				xlt = 0.5*(xle + xlw);
 
-				SIGM1C = VIS*U1CON[i][j][k]/XLT;
-				SIGM2C = VIS*U2CON[i][j][k]/XLT;
+				sigm1c = VIS*u1Con[i][j][k]/xlt;
+				sigm2c = VIS*u2Con[i][j][k]/xlt;
 
 				// friction forces
-				F1[i][j][k] =
-						(SIGM11[i+1][j][k] - SIGM11[i][j][k]) * DS1 +
-						(SIGM12[i][j+1][k] - SIGM12[i][j][k]) * DS2 +
-						(SIGM13[i][j][k+1] - SIGM13[i][j][k]) * DS3 -
-						(L-1)*SIGM1C*DX1*DX2*DX3;
+				f1[i][j][k] =
+						(sigm11[i+1][j][k] - sigm11[i][j][k]) * ds1 +
+						(sigm12[i][j+1][k] - sigm12[i][j][k]) * ds2 +
+						(sigm13[i][j][k+1] - sigm13[i][j][k]) * ds3 -
+						(l-1)*sigm1c*dx1*dx2*dx3;
 
-				F2[i][j][k] =
-						(SIGM21[i+1][j][k] - SIGM21[i][j][k]) * DS1 +
-						(SIGM22[i][j+1][k] - SIGM22[i][j][k]) * DS2 +
-						(SIGM23[i][j][k+1] - SIGM23[i][j][k]) * DS3 -
-						(L-1)*SIGM2C*DX1*DX2*DX3;
+				f2[i][j][k] =
+						(sigm21[i+1][j][k] - sigm21[i][j][k]) * ds1 +
+						(sigm22[i][j+1][k] - sigm22[i][j][k]) * ds2 +
+						(sigm23[i][j][k+1] - sigm23[i][j][k]) * ds3 -
+						(l-1)*sigm2c*dx1*dx2*dx3;
 
-				F3[i][j][k] =
-						(SIGM21[i+1][j][k] - SIGM21[i][j][k]) * DS1 +
-						(SIGM22[i][j+1][k] - SIGM22[i][j][k]) * DS2 +
-						(SIGM23[i][j][k+1] - SIGM23[i][j][k]) * DS3;
+				f3[i][j][k] =
+						(sigm21[i+1][j][k] - sigm21[i][j][k]) * ds1 +
+						(sigm22[i][j+1][k] - sigm22[i][j][k]) * ds2 +
+						(sigm23[i][j][k+1] - sigm23[i][j][k]) * ds3;
 			}
 		}
 	}
@@ -1562,23 +1562,23 @@ void StressTensor()
 
 void UseForces()
 {
-	double XLE, XLW, DVC, ROC, ROCN;
+	double xle, xlw, dvc, roc, rocn;
 
-	for (int i = 1; i < N1; ++i) {
-		for (int j = 1; j < N2; ++j) {
-			for (int k = 1; k < N3; ++k) {
+	for (int i = 1; i < n1; ++i) {
+		for (int j = 1; j < n2; ++j) {
+			for (int k = 1; k < n3; ++k) {
 				// geometric factor of cylindricity
-				XLE = 1+(L-1)*(X1[i+1]-1);
-				XLW = 1+(L-1)*(X1[i]-1);
+				xle = 1+(l-1)*(x1[i+1]-1);
+				xlw = 1+(l-1)*(x1[i]-1);
 				// cell volume
-				DVC = 0.5*(XLE+XLW)*DX1*DX2*DX3;
+				dvc = 0.5*(xle+xlw)*dx1*dx2*dx3;
 
-				ROC = ROCON[i][j][k];
-				ROCN = RONCON[i][j][k];
+				roc = roCon[i][j][k];
+				rocn = ronCon[i][j][k];
 
-				U1NCON[i][j][k] = (ROC*DVC*U1NCON[i][j][k] + 0.5*DT*F1[i][j][k])/(DVC*ROCN);
-				U2NCON[i][j][k] = (ROC*DVC*U2NCON[i][j][k] + 0.5*DT*F2[i][j][k])/(DVC*ROCN);
-				U3NCON[i][j][k] = (ROC*DVC*U3NCON[i][j][k] + 0.5*DT*F3[i][j][k])/(DVC*ROCN);
+				u1nCon[i][j][k] = (roc*dvc*u1nCon[i][j][k] + 0.5*dt*f1[i][j][k])/(dvc*rocn);
+				u2nCon[i][j][k] = (roc*dvc*u2nCon[i][j][k] + 0.5*dt*f2[i][j][k])/(dvc*rocn);
+				u3nCon[i][j][k] = (roc*dvc*u3nCon[i][j][k] + 0.5*dt*f3[i][j][k])/(dvc*rocn);
 			}
 		}
 	}
@@ -1587,72 +1587,185 @@ void UseForces()
 
 void WriteData()
 {
-	//printf("write data\n");
+	char filename[50];
+
+	sprintf_s(filename, 50, "out_%d.tec", nStep);
+
+	FILE *fd;
+	fopen_s(&fd, filename, "w");
+
+	fprintf(fd, "TITLE=\"OUT\"\nVARIABLES=\"X\",\"Y\",\"Z\",\"U1\",\"U2\",\"U3\",\"PC\",\"TC\"\nZONE T=\"%10.4f\", I=%4d, J=%4d, K=%4d, DATAPACKING=BLOCK\n\nVARLOCATION=([4-8]=CELLCENTERED)\n", TIME, n1, n2, n3);
+
+	for (int i = 0; i < n1; ++i)
+	{
+		for (int j = 0; j < n2; ++j)
+		{
+			for (int k = 0; k < n3; ++k)
+			{
+				fprintf(fd, "%16.8E %16.8E %16.8E %16.8E %16.8E %16.8E %16.8E %16.8E\n", x1[i], x2[j], x3[k], u1Con[i][j][k], u2Con[i][j][k], u3Con[i][j][k], ronCon[i][j][k], tnCon[i][j][k]);
+			}			
+		}
+	}
+
+	fclose(fd);
+}
+
+void WriteDataParaView()
+{
+	char filename[50];
+
+	sprintf_s(filename, 50, "out_%d.vtk", nStep);
+
+	FILE *fd;
+	fopen_s(&fd, filename, "w");
+
+	fprintf(fd, "# vtk DataFile Version 3.0\nvtk output\nASCII\n");
+	fprintf(fd, "DATASET RECTILINEAR_GRID\nDIMENSIONS %d %d %d", n1, n2, n3);
+	
+	fprintf(fd, "\nX_COORDINATES %d float\n", n1);
+	for (int i = 1; i <= n1; i++)
+	{
+		fprintf(fd, "%f ", x1[i]);
+	}
+
+	fprintf(fd, "\nY_COORDINATES %d float\n", n2);
+	for (int i = 1; i <= n2; i++)
+	{
+		fprintf(fd, "%f ", x2[i]);
+	}
+
+	fprintf(fd, "\nZ_COORDINATES %d float\n", n3);
+	for (int i = 1; i <= n3; i++)
+	{
+		fprintf(fd, "%f ", x3[i]);
+	}
+
+	fprintf(fd, "\nCELL_DATA %d\nscalars U1 float\nLOOKUP_TABLE default\n", (n1-1)*(n2-1)*(n3-1));
+	for (int k = 1; k < n3; k++)
+	{
+		for (int i = 1; i < n1; i++)
+		{
+			for (int j = 1; j < n2; j++)
+			{
+				fprintf(fd, "%f ", u1nCon[i][j][k]);
+			}
+		}
+	}
+	
+	fprintf(fd, "\nscalars U2 float\nLOOKUP_TABLE default\n");
+	for (int k = 1; k < n3; k++)
+	{
+		for (int i = 1; i < n1; i++)
+		{
+			for (int j = 1; j < n2; j++)
+			{
+				fprintf(fd, "%f ", u2nCon[i][j][k]);
+			}
+		}
+	}
+
+	fprintf(fd, "\nscalars U3 float\nLOOKUP_TABLE default\n");
+	for (int k = 1; k < n3; k++)
+	{
+		for (int i = 1; i < n1; i++)
+		{
+			for (int j = 1; j < n2; j++)
+			{
+				fprintf(fd, "%f ", u3nCon[i][j][k]);
+			}
+		}
+	}
+
+	fprintf(fd, "\nscalars PC float\nLOOKUP_TABLE default\n");
+	for (int k = 1; k < n3; k++)
+	{
+		for (int i = 1; i < n1; i++)
+		{
+			for (int j = 1; j < n2; j++)
+			{
+				fprintf(fd, "%f ", ronCon[i][j][k]);
+			}
+		}
+	}
+
+	fprintf(fd, "\nscalars TC float\nLOOKUP_TABLE default\n");
+	for (int k = 1; k < n3; k++)
+	{
+		for (int i = 1; i < n1; i++)
+		{
+			for (int j = 1; j < n2; j++)
+			{
+				fprintf(fd, "%f ", tnCon[i][j][k]);
+			}
+		}
+	}
+	
+	fclose(fd);
 }
 
 void FreeMemory()
 {
-	free(X1);
-	free(X2);
-	free(X3);
+	free(x1);
+	free(x2);
+	free(x3);
 
-	deallocate3D(ROCON, N1, N2);
-	deallocate3D(U1CON, N1, N2);
-	deallocate3D(U2CON, N1, N2);
-	deallocate3D(U3CON, N1, N2);
-	deallocate3D(TCON, N1, N2);
+	deallocate3D(roCon, n1, n2);
+	deallocate3D(u1Con, n1, n2);
+	deallocate3D(u2Con, n1, n2);
+	deallocate3D(u3Con, n1, n2);
+	deallocate3D(tCon, n1, n2);
 
-	deallocate3D(RONCON, N1, N2);
-	deallocate3D(U1NCON, N1, N2);
-	deallocate3D(U2NCON, N1, N2);
-	deallocate3D(U3NCON, N1, N2);
-	deallocate3D(TNCON, N1, N2);
+	deallocate3D(ronCon, n1, n2);
+	deallocate3D(u1nCon, n1, n2);
+	deallocate3D(u2nCon, n1, n2);
+	deallocate3D(u3nCon, n1, n2);
+	deallocate3D(tnCon, n1, n2);
 
-	deallocate3D(RO1, N1+1, N2);
-	deallocate3D(T1, N1+1, N2);
-	deallocate3D(U11, N1+1, N2);
-	deallocate3D(U21, N1+1, N2);
-	deallocate3D(U31, N1+1, N2);
-	deallocate3D(P1, N1+1, N2);
+	deallocate3D(ro1, n1+1, n2);
+	deallocate3D(t1, n1+1, n2);
+	deallocate3D(u11, n1+1, n2);
+	deallocate3D(u21, n1+1, n2);
+	deallocate3D(u31, n1+1, n2);
+	deallocate3D(p1, n1+1, n2);
 
-	deallocate3D(RO2, N1, N2+1);
-	deallocate3D(T2, N1, N2+1);
-	deallocate3D(U12, N1, N2+1);
-	deallocate3D(U22, N1, N2+1);
-	deallocate3D(U32, N1, N2+1);
-	deallocate3D(P2, N1, N2+1);
+	deallocate3D(ro2, n1, n2+1);
+	deallocate3D(t2, n1, n2+1);
+	deallocate3D(u12, n1, n2+1);
+	deallocate3D(u22, n1, n2+1);
+	deallocate3D(u32, n1, n2+1);
+	deallocate3D(p2, n1, n2+1);
 
-	deallocate3D(RO3, N1, N2);
-	deallocate3D(T3, N1, N2);
-	deallocate3D(U13, N1, N2);
-	deallocate3D(U23, N1, N2);
-	deallocate3D(U33, N1, N2);
-	deallocate3D(P3, N1, N2);
+	deallocate3D(ro3, n1, n2);
+	deallocate3D(t3, n1, n2);
+	deallocate3D(u13, n1, n2);
+	deallocate3D(u23, n1, n2);
+	deallocate3D(u33, n1, n2);
+	deallocate3D(p3, n1, n2);
 
-	deallocate3D(F1, N1, N2);
-	deallocate3D(F2, N1, N2);
-	deallocate3D(F3, N1, N2);
+	deallocate3D(f1, n1, n2);
+	deallocate3D(f2, n1, n2);
+	deallocate3D(f3, n1, n2);
 
-	free(RBUF);
-	free(QBUF);
-	free(TFBUF);
-	free(TBBUF);
-	free(U2FBUF);
-	free(U2BBUF);
-	free(U3FBUF);
-	free(U3BBUF);
+	free(rBuf);
+	free(qBuf);
+	free(tfBuf);
+	free(tbBuf);
+	free(u2fBuf);
+	free(u2bBuf);
+	free(u3fBuf);
+	free(u3bBuf);
 
-	deallocate3D(SIGM11, N1, N2);
-	deallocate3D(SIGM21, N1, N2);
-	deallocate3D(SIGM31, N1, N2);
+	deallocate3D(sigm11, n1, n2);
+	deallocate3D(sigm21, n1, n2);
+	deallocate3D(sigm31, n1, n2);
 
-	deallocate3D(SIGM12, N1, N2);
-	deallocate3D(SIGM22, N1, N2);
-	deallocate3D(SIGM32, N1, N2);
+	deallocate3D(sigm12, n1, n2);
+	deallocate3D(sigm22, n1, n2);
+	deallocate3D(sigm32, n1, n2);
 
-	deallocate3D(SIGM13, N1, N2);
-	deallocate3D(SIGM23, N1, N2);
-	deallocate3D(SIGM33, N1, N2);
+	deallocate3D(sigm13, n1, n2);
+	deallocate3D(sigm23, n1, n2);
+	deallocate3D(sigm33, n1, n2);
 }
 
 double ***allocate3D(int n1, int n2, int n3)
