@@ -40,6 +40,7 @@ int main (int argc, char** argv)
 		UseForces();
 		Phase2();
 		Phase1();
+		StressTensor();
 		UseForces();
 		TIME += 0.5*dt;
 
@@ -286,7 +287,7 @@ void InitializeData()
 
 void TimeStepSize()
 {
-	double x1c, x1l, u1c, u2c, u3c, dtu1, dtu2, dtu3, dtu, dtv1, dtv2, dtv3, dtv;
+	double x1c, x1l, u1_c, u2_c, u3_c, dtu1, dtu2, dtu3, dtu, dtv1, dtv2, dtv3, dtv;
 
 	dt = pow(10, 8);
 
@@ -296,13 +297,13 @@ void TimeStepSize()
 				x1c = (x1[i+1] + x1[i])/2;
 				x1l = 1+(l-1)*(x1c-1);
 
-				u1c = u1Con[i][j][k];
-				u2c = u2Con[i][j][k];
-				u3c = u3Con[i][j][k];
+				u1_c = u1Con[i][j][k];
+				u2_c = u2Con[i][j][k];
+				u3_c = u3Con[i][j][k];
 
-				dtu1 = CFL*dx1/(sound + fabs(u1c));
-				dtu2 = CFL*x1l*dx2/(sound + fabs(u2c));
-				dtu3 = CFL*dx3/(sound + fabs(u3c));
+				dtu1 = CFL*dx1/(sound + fabs(u1_c));
+				dtu2 = CFL*x1l*dx2/(sound + fabs(u2_c));
+				dtu3 = CFL*dx3/(sound + fabs(u3_c));
 
 				// DTU = MIN(DTU1, DTU2, DTU3)
 				dtu = min3d(dtu1, dtu2, dtu3);
@@ -346,21 +347,21 @@ void Phase1()
 	double ds1, ds2, ds3, dvc, xle, xlw, xlt, xlb, alfa;
 
 			// velocity, density, temperature and pressure on the eastern plane
-	double	u1_e, u2_e, u3_e, roe, te, pe,
+	double	u1_e, u2_e, u3_e, ro_e, t_e, p_e,
 			// velocity, density , temperature and pressure on the western plane
-			u1_w, u2_w, u3_w, row, tw, pw,
+			u1_w, u2_w, u3_w, ro_w, t_w, p_w,
 			// velocity, density , temperature and pressure on the northern plane
-			u1_n, u2_n, u3_n, ron, tn, pn,
+			u1_n, u2_n, u3_n, ro_n, t_n, p_n,
 			// velocity, density , temperature and pressure on the southern plane
-			u1_s, u2_s, u3_s, ros, ts, ps,
+			u1_s, u2_s, u3_s, ro_s, t_s, p_s,
 			// velocity, density , temperature and pressure on the top plane
-			u1_t, u2_t, u3_t, rot, tt, pt,
+			u1_t, u2_t, u3_t, ro_t, t_t, p_t,
 			// velocity, density , temperature and pressure on the bottom plane
-			u1_b, u2_b, u3_b, rob, tb, pb,
+			u1_b, u2_b, u3_b, ro_b, t_b, p_b,
 			// velocity, density and temperature in the cell center
-			u1_c, u2_c, u3_c, roc, tc,
+			u1_c, u2_c, u3_c, ro_c, t_c,
 			// velocity, density and temperature in the cell center on the next time step
-			u1_cn, u2_cn, u3_cn, rocn, tcn;
+			u1_cn, u2_cn, u3_cn, ro_cn, t_cn;
 
 	// plane squares
 	ds1 = dx2*dx3;
@@ -394,92 +395,92 @@ void Phase1()
 				u1_e = u11[i + 1][j][k];
 				u2_e = u21[i + 1][j][k];
 				u3_e = u31[i + 1][j][k];
-				roe = ro1[i + 1][j][k];
-				te = t1[i + 1][j][k];
-				pe = p1[i + 1][j][k];
+				ro_e = ro1[i + 1][j][k];
+				t_e = t1[i + 1][j][k];
+				p_e = p1[i + 1][j][k];
 				// west plane
 				u1_w = u11[i][j][k];
 				u2_w = u21[i][j][k];
 				u3_w = u31[i][j][k];
-				row = ro1[i][j][k];
-				tw = t1[i][j][k];
-				pw = p1[i][j][k];
+				ro_w = ro1[i][j][k];
+				t_w = t1[i][j][k];
+				p_w = p1[i][j][k];
 
 				// north plane
 				u1_n = u12[i][j + 1][k];
 				u2_n = u22[i][j + 1][k];
 				u3_n = u32[i][j + 1][k];
-				ron = ro2[i][j + 1][k];
-				tn = t2[i][j + 1][k];
-				pn = p2[i][j + 1][k];
+				ro_n = ro2[i][j + 1][k];
+				t_n = t2[i][j + 1][k];
+				p_n = p2[i][j + 1][k];
 				// south plane
 				u1_s = u12[i][j][k];
 				u2_s = u22[i][j][k];
 				u3_s = u32[i][j][k];
-				ros = ro2[i][j][k];
-				ts = t2[i][j][k];
-				ps = p2[i][j][k];
+				ro_s = ro2[i][j][k];
+				t_s = t2[i][j][k];
+				p_s = p2[i][j][k];
 
 				// top plane
 				u1_t = u13[i][j][k + 1];
 				u2_t = u23[i][j][k + 1];
 				u3_t = u33[i][j][k + 1];
-				rot = ro3[i][j][k + 1];
-				tt = t3[i][j][k + 1];
-				pt = p3[i][j][k + 1];
+				ro_t = ro3[i][j][k + 1];
+				t_t = t3[i][j][k + 1];
+				p_t = p3[i][j][k + 1];
 				// bottom plane
 				u1_b = u13[i][j][k];
 				u2_b = u23[i][j][k];
 				u3_b = u33[i][j][k];
-				rob = ro3[i][j][k];
-				tb = t3[i][j][k];
-				pb = p3[i][j][k];
+				ro_b = ro3[i][j][k];
+				t_b = t3[i][j][k];
+				p_b = p3[i][j][k];
 
 				// cell center
 				u1_c = u1Con[i][j][k];
 				u2_c = u2Con[i][j][k];
 				u3_c = u3Con[i][j][k];
-				roc = roCon[i][j][k];
-				tc = tCon[i][j][k];
+				ro_c = roCon[i][j][k];
+				t_c = tCon[i][j][k];
 				
 				// #####################################################
 				//					new values evaluating
 				// #####################################################
 
 				// new density
-				rocn = (roc*dvc - 0.5*dt*((xle*roe*u1_e - xlw*row*u1_w)*ds1 +
-					(ron*u2_n - ros*u2_s)*ds2 + (xlt*rot*u3_t - xlb*rob*u3_b)*ds3)) / dvc;
+				ro_cn = (ro_c*dvc - 0.5*dt*((xle*ro_e*u1_e - xlw*ro_w*u1_w)*ds1 +
+					(ro_n*u2_n - ro_s*u2_s)*ds2 + (xlt*ro_t*u3_t - xlb*ro_b*u3_b)*ds3)) / dvc;
 				
 				// new conservative velocity along the x1 axis
-				double U1CP = (roc*u1_c*dvc - 0.5*dt*((ron*u2_n*u1_n - ros*u2_s*u1_s)*ds2 +
-					(xlt*rot*u3_t*u1_t - xlb*rob*u3_b*u1_b)*ds3 +
-					(xle*(roe*u1_e*roe*u1_e + pe) - xlw*(row*u1_w*row*u1_w + pw))*ds1
-					- 0.5*(l - 1)*(pe + pw)*dx1*dx2*dx3)) / (dvc*rocn);
+				double u1_cp = (ro_c*u1_c*dvc - 0.5*dt*((ro_n*u2_n*u1_n - ro_s*u2_s*u1_s)*ds2 +
+					(xlt*ro_t*u3_t*u1_t - xlb*ro_b*u3_b*u1_b)*ds3 +
+					(xle*(ro_e*u1_e*ro_e*u1_e + p_e) - xlw*(ro_w*u1_w*ro_w*u1_w + p_w))*ds1
+					- 0.5*(l - 1)*(p_e + p_w)*dx1*dx2*dx3)) / (dvc*ro_cn);
 				// new conservative velocity along the X2 axis
-				double U2CP = U2CP = (roc*u2_c*dvc - 0.5*dt*((xle*roe*u1_e*u2_e - xlw*row*u1_w*u2_w)*ds1 +
-					((ron*u2_n*ron*u2_n + pn) - (ros*u2_s*ros*u2_s + ps))*ds2 +
-					(xlt*rot*u3_t*u2_t - xlb*rob*u3_b*u2_b)*ds3)) / (dvc*rocn);
+				double u2_cp = (ro_c*u2_c*dvc - 0.5*dt*((xle*ro_e*u1_e*u2_e - xlw*ro_w*u1_w*u2_w)*ds1 +
+					((ro_n*u2_n*ro_n*u2_n + p_n) - (ro_s*u2_s*ro_s*u2_s + p_s))*ds2 +
+					(xlt*ro_t*u3_t*u2_t - xlb*ro_b*u3_b*u2_b)*ds3)) / (dvc*ro_cn);
 
 				// take into account of centrifugal and Coriolis forces
-				u1_cn = (U1CP - alfa*u2_c*U1CP) / (1 + (alfa*u2_c)*(alfa*u2_c));
-				u2_cn = U2CP - alfa*u2_c*u1_cn;
+				u1_cn = (u1_cp - alfa*u2_c*u1_cp) / (1 + (alfa*u2_c)*(alfa*u2_c));
+				u2_cn = u2_cp - alfa*u2_c*u1_cn;
 
 				// new conservative velocity along the X3 axis
-				u3_cn = (roc*u3_c*dvc - 0.5*dt*((xle*roe*u1_e*u3_e - xlw*row*u1_w*u3_w)*ds1 +
-					(ron*u2_n*u3_n - ros*u2_s*u3_s)*ds2 +
-					(xlt*(rot*u3_t*rot*u3_t + pt) - xlb*(rob*u3_b*rob*u3_b + pb))*ds3)) / (dvc*rocn);
+				u3_cn = (ro_c*u3_c*dvc - 0.5*dt*((xle*ro_e*u1_e*u3_e - xlw*ro_w*u1_w*u3_w)*ds1 +
+					(ro_n*u2_n*u3_n - ro_s*u2_s*u3_s)*ds2 +
+					(xlt*(ro_t*u3_t*ro_t*u3_t + p_t) - xlb*(ro_b*u3_b*ro_b*u3_b + p_b))*ds3)) / (dvc*ro_cn);
 
 				// new temperature
-				tcn = (roc*tc*dvc - 0.5*dt*((xle*roe*te*u1_e - xlw*row*tw*u1_w)*ds1 +
-					(ron*tn*u2_n - ros*ts*u2_s)*ds2 +
-					(xlt*rot*tt*u3_t - xlb*rob*tb*u3_b)*ds3)) / (dvc*rocn);
+				t_cn = (ro_c*t_c*dvc - 0.5*dt*((xle*ro_e*t_e*u1_e - xlw*ro_w*t_w*u1_w)*ds1 +
+					(ro_n*t_n*u2_n - ro_s*t_s*u2_s)*ds2 +
+					(xlt*ro_t*t_t*u3_t - xlb*ro_b*t_b*u3_b)*ds3)) / (dvc*ro_cn);
 
 				// finally
 				u1nCon[i][j][k] = u1_cn;
 				u2nCon[i][j][k] = u2_cn;
 				u3nCon[i][j][k] = u3_cn;
-				ronCon[i][j][k] = rocn;
-				tnCon[i][j][k] = tcn;
+				ronCon[i][j][k] = ro_cn;
+				tnCon[i][j][k] = t_cn;
 			}
 		}
 	}
@@ -1390,7 +1391,7 @@ void StressTensor()
 	// 				bypassing along the faces
 	// #####################################################
 
-	double xle, xlw, xlt, xln, u1c, u1ce, u2c, u2ce, u3c, u3ce;
+	double xle, xlw, xlt, xln, u1_c, u1_ce, u2_c, u2_ce, u3_c, u3_ce;
 
 	// bypassing along the face perpendicular to x1
 	for (int i = 1; i <= n1; ++i) {
@@ -1401,24 +1402,24 @@ void StressTensor()
 				xle = 1 + (l-1)*(x1[i] - 1);
 
 				// velocity components in cell centers
-				u1c = u1Con[i][j][k];
-				u1ce = u1Con[i-1][j][k];
+				u1_c = u1Con[i][j][k];
+				u1_ce = u1Con[i-1][j][k];
 
-				u2c = u2Con[i][j][k];
-				u2ce = u2Con[i-1][j][k];
+				u2_c = u2Con[i][j][k];
+				u2_ce = u2Con[i-1][j][k];
 
-				u3c = u3Con[i][j][k];
-				u3ce = u3Con[i-1][j][k];
+				u3_c = u3Con[i][j][k];
+				u3_ce = u3Con[i-1][j][k];
 
 				// friction stress
-				sigm11[i][j][k]=-VIS*xle*(u1ce-u1c)/dx1;
-				sigm21[i][j][k]=-VIS*xle*(u2ce-u2c)/dx1;
-				sigm31[i][j][k]=-VIS*xle*(u3ce-u3c)/dx1;
+				sigm11[i][j][k]=-VIS*xle*(u1_ce-u1_c)/dx1;
+				sigm21[i][j][k]=-VIS*xle*(u2_ce-u2_c)/dx1;
+				sigm31[i][j][k]=-VIS*xle*(u3_ce-u3_c)/dx1;
 			}
 		}
 	}
 
-	double u1cn, u2cn, u3cn;
+	double u1_cn, u2_cn, u3_cn;
 
 	// bypassing along the face perpenditcular to X2
 	for (int i = 1; i < n1; ++i) {
@@ -1435,24 +1436,24 @@ void StressTensor()
 				xln = xlt;
 
 				// velocity components in cell centers
-				u1c = u1Con[i][j][k];
-				u1cn = u1Con[i][j-1][k];
+				u1_c = u1Con[i][j][k];
+				u1_cn = u1Con[i][j-1][k];
 
-				u2c = u2Con[i][j][k];
-				u2cn = u2Con[i][j-1][k];
+				u2_c = u2Con[i][j][k];
+				u2_cn = u2Con[i][j-1][k];
 
-				u3c = u3Con[i][j][k];
-				u3cn = u3Con[i][j-1][k];
+				u3_c = u3Con[i][j][k];
+				u3_cn = u3Con[i][j-1][k];
 
 				// friction stress
-				sigm12[i][j][k]=-VIS*((u1cn-u1c)/dx2 -(l-1)*(u2c+u2cn))/xln;
-				sigm22[i][j][k]=-VIS*((u2cn-u2c)/dx2 +(l-1)*(u1c+u1cn))/xln;
-				sigm32[i][j][k]=-VIS*(u3cn-u3c)/dx2;
+				sigm12[i][j][k]=-VIS*((u1_cn-u1_c)/dx2 -(l-1)*(u2_c+u2_cn))/xln;
+				sigm22[i][j][k]=-VIS*((u2_cn-u2_c)/dx2 +(l-1)*(u1_c+u1_cn))/xln;
+				sigm32[i][j][k]=-VIS*(u3_cn-u3_c)/dx2;
 			}
 		}
 	}
 
-	double u1ct, u2ct, u3ct;
+	double u1_ct, u2_ct, u3_ct;
 
 	// bypassing along the face perpenditcular to X3
 	for (int i = 1; i < n1; ++i) {
@@ -1467,19 +1468,19 @@ void StressTensor()
 				xlt = 0.5*(xle + xlw);
 
 				// velocity components in the cell centers
-				u1c = u1Con[i][j][k];
-				u1ct = u1Con[i][j][k-1];
+				u1_c = u1Con[i][j][k];
+				u1_ct = u1Con[i][j][k-1];
 
-				u2c = u2Con[i][j][k];
-				u2ct = u2Con[i][j][k-1];
+				u2_c = u2Con[i][j][k];
+				u2_ct = u2Con[i][j][k-1];
 
-				u3c = u3Con[i][j][k];
-				u3ct = u3Con[i][j][k-1];
+				u3_c = u3Con[i][j][k];
+				u3_ct = u3Con[i][j][k-1];
 
 				// friction stress
-				sigm13[i][j][k]=-VIS*xlt*(u1ct-u1c)/dx3;
-				sigm23[i][j][k]=-VIS*xlt*(u2ct-u2c)/dx3;
-				sigm33[i][j][k]=-VIS*xlt*(u3ct-u3c)/dx3;
+				sigm13[i][j][k]=-VIS*xlt*(u1_ct-u1_c)/dx3;
+				sigm23[i][j][k]=-VIS*xlt*(u2_ct-u2_c)/dx3;
+				sigm33[i][j][k]=-VIS*xlt*(u3_ct-u3_c)/dx3;
 			}
 		}
 	}
@@ -1523,9 +1524,9 @@ void StressTensor()
 						(l-1)*sigm2c*dx1*dx2*dx3;
 
 				f3[i][j][k] =
-						(sigm21[i+1][j][k] - sigm21[i][j][k]) * ds1 +
-						(sigm22[i][j+1][k] - sigm22[i][j][k]) * ds2 +
-						(sigm23[i][j][k+1] - sigm23[i][j][k]) * ds3;
+						(sigm31[i+1][j][k] - sigm31[i][j][k]) * ds1 +
+						(sigm32[i][j+1][k] - sigm32[i][j][k]) * ds2 +
+						(sigm33[i][j][k+1] - sigm33[i][j][k]) * ds3;
 			}
 		}
 	}
@@ -1534,7 +1535,7 @@ void StressTensor()
 
 void UseForces()
 {
-	double xle, xlw, dvc, roc, rocn;
+	double xle, xlw, dvc, ro_c, ro_cn;
 
 	for (int i = 1; i < n1; ++i) {
 		for (int j = 1; j < n2; ++j) {
@@ -1545,12 +1546,12 @@ void UseForces()
 				// cell volume
 				dvc = 0.5*(xle+xlw)*dx1*dx2*dx3;
 
-				roc = roCon[i][j][k];
-				rocn = ronCon[i][j][k];
+				ro_c = roCon[i][j][k];
+				ro_cn = ronCon[i][j][k];
 
-				u1nCon[i][j][k] = (roc*dvc*u1nCon[i][j][k] + 0.5*dt*f1[i][j][k])/(dvc*rocn);
-				u2nCon[i][j][k] = (roc*dvc*u2nCon[i][j][k] + 0.5*dt*f2[i][j][k])/(dvc*rocn);
-				u3nCon[i][j][k] = (roc*dvc*u3nCon[i][j][k] + 0.5*dt*f3[i][j][k])/(dvc*rocn);
+				u1nCon[i][j][k] = (ro_c*dvc*u1nCon[i][j][k] + 0.5*dt*f1[i][j][k])/(dvc*ro_cn);
+				u2nCon[i][j][k] = (ro_c*dvc*u2nCon[i][j][k] + 0.5*dt*f2[i][j][k])/(dvc*ro_cn);
+				u3nCon[i][j][k] = (ro_c*dvc*u3nCon[i][j][k] + 0.5*dt*f3[i][j][k])/(dvc*ro_cn);
 			}
 		}
 	}
