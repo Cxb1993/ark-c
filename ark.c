@@ -127,47 +127,47 @@ void Input()
 	// #####################################################
 
 	// coordinates of grid nodes along the all of the axises
-	x1 = calloc(n1+2, sizeof(double));
-	x2 = calloc(n2+2, sizeof(double));
-	x3 = calloc(n3+2, sizeof(double));
+	x1 = calloc(n1, sizeof(double));
+	x2 = calloc(n2, sizeof(double));
+	x3 = calloc(n3, sizeof(double));
 
 	// variables on the current time step
-	roCon	= allocate3D(n1, n2, n3);
-	tCon	= allocate3D(n1, n2, n3);
-	u1Con	= allocate3D(n1, n2, n3);
-	u2Con	= allocate3D(n1, n2, n3);
-	u3Con	= allocate3D(n1, n2, n3);
+	roCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	tCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	u1Con = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	u2Con = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	u3Con = allocate3D(n1 - 1, n2 - 1, n3 - 1);
 
 	// variables on the next time step
-	ronCon	= allocate3D(n1, n3, n3);
-	tnCon	= allocate3D(n1, n2, n3);
-	u1nCon	= allocate3D(n1, n2, n3);
-	u2nCon	= allocate3D(n1, n2, n3);
-	u3nCon	= allocate3D(n1, n2, n3);
+	ronCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	tnCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	u1nCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	u2nCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	u3nCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
 
 	// variables perpendicular to the axis x1
-	ro1	= allocate3D(n1+1, n2, n3);
-	t1	= allocate3D(n1+1, n2, n3);
-	u11	= allocate3D(n1+1, n2, n3);
-	u21	= allocate3D(n1+1, n2, n3);
-	u31	= allocate3D(n1+1, n2, n3);
-	p1	= allocate3D(n1+1, n2, n3);
+	ro1 = allocate3D(n1, n2, n3);
+	t1 = allocate3D(n1, n2, n3);
+	u11 = allocate3D(n1, n2, n3);
+	u21 = allocate3D(n1, n2, n3);
+	u31 = allocate3D(n1, n2, n3);
+	p1 = allocate3D(n1, n2, n3);
 
 	// variables perpendicular to the axis X2
-	ro2	= allocate3D(n1, n2+1, n3);
-	t2	= allocate3D(n1, n2+1, n3);
-	u12	= allocate3D(n1, n2+1, n3);
-	u22	= allocate3D(n1, n2+1, n3);
-	u32	= allocate3D(n1, n2+1, n3);
-	p2	= allocate3D(n1, n2+1, n3);
+	ro2 = allocate3D(n1, n2, n3);
+	t2 = allocate3D(n1, n2, n3);
+	u12 = allocate3D(n1, n2, n3);
+	u22 = allocate3D(n1, n2, n3);
+	u32 = allocate3D(n1, n2, n3);
+	p2 = allocate3D(n1, n2, n3);
 
 	// variables perpendicular to the axis X3
-	ro3	= allocate3D(n1, n2, n3+1);
-	t3	= allocate3D(n1, n2, n3+1);
-	u13	= allocate3D(n1, n2, n3+1);
-	u23	= allocate3D(n1, n2, n3+1);
-	u33	= allocate3D(n1, n2, n3+1);
-	p3	= allocate3D(n1, n2, n3+1);
+	ro3 = allocate3D(n1, n2, n3);
+	t3 = allocate3D(n1, n2, n3);
+	u13 = allocate3D(n1, n2, n3);
+	u23 = allocate3D(n1, n2, n3);
+	u33 = allocate3D(n1, n2, n3);
+	p3 = allocate3D(n1, n2, n3);
 
 	// forces
 	f1 = allocate3D(n1, n2, n3);
@@ -213,32 +213,44 @@ void InitializeData()
 	dx2=(x2_n-x2_s)/(n2-1);
 	dx3=(x3_t-x3_b)/(n3-1);
 
-	x1[0] = x1_w - dx1;
-	x2[0] = x2_s - dx2;
-	x3[0] = x3_b - dx3;
+	x1[0] = x1_w;
+	x2[0] = x2_s;
+	x3[0] = x3_b;
 
-	// block of arrays initialization
-	for (int i = 0; i <= n1 ; ++i) {
-		x1[i+1] = x1[i] + dx1;
+	// #####################################################
+	// 				block of arrays initialization
+	// #####################################################
+
+	// along the X1 axis
+	for (int j = 0; j < n1 - 1 ; ++j) {
+		x1[j + 1] = x1[j] + dx1;
 	}
 
-	for (int j = 0; j <= n2 ; ++j) {
-		x2[j +1] = x2[j] + dx2;
+	// along the X2 axis
+	for (int i = 0; i < n2 - 1; ++i) {
+		x2[i + 1] = x2[i] + dx2;
 	}
 
-	for (int k = 0; k <= n3 ; ++k) {
-		x3[k +1] = x3[k] + dx3;
+	// along the X3 axis
+	for (int k = 0; k < n3 - 1; ++k) {
+		x3[k + 1] = x3[k] + dx3;
 	}
 
-	for (int i = 0; i <= n1; ++i) {
-		for (int j = 0; j <= n2; ++j) {
-			for (int k = 0; k <= n3; ++k) {
+	for (int i = 0; i < n2 - 1; ++i) {
+		for (int j = 0; j < n1 - 1; ++j) {
+			for (int k = 0; k < n3 - 1; ++k) {
 				u1Con[i][j][k] = u1nCon[i][j][k] = u10;
 				u2Con[i][j][k] = u2nCon[i][j][k] = u20;
 				u3Con[i][j][k] = u3nCon[i][j][k] = u30;
 				roCon[i][j][k] = ronCon[i][j][k] = ro0_g;
 				tCon[i][j][k] = tnCon[i][j][k] = t0;
+			}
+		}
+	}
 
+	for (int i = 0; i < n2; ++i) {
+		for (int j = 0; j < n1; ++j) {
+			for (int k = 0; k < n3; ++k) {
 				p1[i][j][k] = p2[i][j][k] = p3[i][j][k] = 0.;
 				ro1[i][j][k] = ro2[i][j][k] = ro3[i][j][k] = ro0_g;
 				u11[i][j][k] = u12[i][j][k] = u13[i][j][k] = u10;
@@ -246,40 +258,6 @@ void InitializeData()
 				u31[i][j][k] = u32[i][j][k] = u33[i][j][k] = u30;
 				t1[i][j][k] = t2[i][j][k] = t3[i][j][k] = t0;
 			}
-
-		}
-	}
-
-	for (int j = 0; j <= n2; ++j) {
-		for (int k = 0; k <= n3; ++k) {
-			p1[n1+1][j][k] = 0.;
-			ro1[n1+1][j][k] = ro0_g;
-			u11[n1+1][j][k] = u10;
-			u21[n1+1][j][k] = u20;
-			u31[n1+1][j][k] = u30;
-			t1[n1+1][j][k] = t0;
-		}
-	}
-
-	for (int i = 0; i <= n1; ++i) {
-		for (int k = 0; k <= n3; ++k) {
-			p2[i][n2+1][k] = 0.;
-			ro2[i][n2+1][k] = ro0_g;
-			u12[i][n2+1][k] = u10;
-			u22[i][n2+1][k] = u20;
-			u32[i][n2+1][k] = u30;
-			t2[i][n2+1][k] = t0;
-		}
-	}
-
-	for (int i = 0; i <= n1; ++i) {
-		for (int j = 0; j <= n2; ++j) {
-			p3[i][j][n3+1] = 0.;
-			ro3[i][j][n3+1] = ro0_g;
-			u13[i][j][n3+1] = u10;
-			u23[i][j][n3+1] = u20;
-			u33[i][j][n3+1] = u30;
-			t3[i][j][n3+1] = t0;
 		}
 	}
 
@@ -1745,12 +1723,12 @@ double ***allocate3D(int n1, int n2, int n3)
 {
 	double ***arr;
 
-	arr = calloc((size_t)(n1+1), sizeof(double**));
+	arr = calloc(n1, sizeof(double**));
 
-	for (int i = 0; i <= n1; ++i) {
-		arr[i] = calloc((size_t)(n2+1), sizeof(double*));
-		for (int j = 0; j <= n2; ++j) {
-			arr[i][j] = calloc((size_t)(n3+1), sizeof(double));
+	for (int i = 0; i < n1; ++i) {
+		arr[i] = calloc(n2, sizeof(double*));
+		for (int j = 0; j < n2; ++j) {
+			arr[i][j] = calloc(n3, sizeof(double));
 		}
 	}
 
@@ -1759,8 +1737,8 @@ double ***allocate3D(int n1, int n2, int n3)
 
 void deallocate3D(double*** arr, int n1, int n2)
 {
-	for (int i = 0; i <= n1; ++i) {
-		for (int j = 0; j <= n2; ++j) {
+	for (int i = 0; i < n1; ++i) {
+		for (int j = 0; j < n2; ++j) {
 			free(arr[i][j]);
 		}
 		free(arr[i]);
