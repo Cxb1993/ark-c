@@ -132,51 +132,50 @@ void Input()
 	x3 = calloc(n3, sizeof(double));
 
 	// variables on the current time step
-	roCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-	tCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-	u1Con = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-	u2Con = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-	u3Con = allocate3D(n1 - 1, n2 - 1, n3 - 1);
+	roCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	tCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	u1Con = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	u2Con = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	u3Con = allocate3D(n2 + 1, n1 + 1, n3 + 1);
 
 	// variables on the next time step
-	ronCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-	tnCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-	u1nCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-	u2nCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-	u3nCon = allocate3D(n1 - 1, n2 - 1, n3 - 1);
-
-	// variables perpendicular to the axis x1
-	ro1 = allocate3D(n1, n2, n3);
-	t1 = allocate3D(n1, n2, n3);
-	u11 = allocate3D(n1, n2, n3);
-	u21 = allocate3D(n1, n2, n3);
-	u31 = allocate3D(n1, n2, n3);
-	p1 = allocate3D(n1, n2, n3);
-
-	// variables perpendicular to the axis X2
-	ro2 = allocate3D(n1, n2, n3);
-	t2 = allocate3D(n1, n2, n3);
-	u12 = allocate3D(n1, n2, n3);
-	u22 = allocate3D(n1, n2, n3);
-	u32 = allocate3D(n1, n2, n3);
-	p2 = allocate3D(n1, n2, n3);
-
-	// variables perpendicular to the axis X3
-	ro3 = allocate3D(n1, n2, n3);
-	t3 = allocate3D(n1, n2, n3);
-	u13 = allocate3D(n1, n2, n3);
-	u23 = allocate3D(n1, n2, n3);
-	u33 = allocate3D(n1, n2, n3);
-	p3 = allocate3D(n1, n2, n3);
+	ronCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	tnCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	u1nCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	u2nCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	u3nCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
 
 	// forces
-	f1 = allocate3D(n1, n2, n3);
-	f2 = allocate3D(n1, n2, n3);
-	f3 = allocate3D(n1, n2, n3);
+	f1 = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	f2 = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+	f3 = allocate3D(n2 + 1, n1 + 1, n3 + 1);
 
-	// get into NMAX maxim of n1, n2, n3
-	int nmax = (n1 > n2 ? n1 : n2);
-	nmax = nmax > n3 ? nmax : n3;
+	// variables perpendicular to the axis x1
+	ro1 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	t1 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u11 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u21 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u31 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	p1 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+
+	// variables perpendicular to the axis X2
+	ro2 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	t2 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u12 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u22 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u32 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	p2 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+
+	// variables perpendicular to the axis X3
+	ro3 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	t3 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u13 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u23 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	u33 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	p3 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+
+	// NMAX = MAX(n1, n2, n3)
+	int nmax = (int)max3d(n1, n2, n3);
 
 	// additional buffers for phase 2
 	rBuf	= calloc((nmax+2), sizeof(double));
@@ -189,17 +188,17 @@ void Input()
 	u3bBuf	= calloc((nmax+2), sizeof(double));
 
 	// friction stress
-	sigm11 = allocate3D(n1, n2, n3);
-	sigm21 = allocate3D(n1, n2, n3);
-	sigm31 = allocate3D(n1, n2, n3);
+	sigm11 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	sigm21 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	sigm31 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
 
-	sigm12 = allocate3D(n1, n2, n3);
-	sigm22 = allocate3D(n1, n2, n3);
-	sigm32 = allocate3D(n1, n2, n3);
+	sigm12 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	sigm22 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	sigm32 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
 
-	sigm13 = allocate3D(n1, n2, n3);
-	sigm23 = allocate3D(n1, n2, n3);
-	sigm33 = allocate3D(n1, n2, n3);
+	sigm13 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	sigm23 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
+	sigm33 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
 }
 
 void InitializeData()
@@ -213,32 +212,32 @@ void InitializeData()
 	dx2=(x2_n-x2_s)/(n2-1);
 	dx3=(x3_t-x3_b)/(n3-1);
 
-	x1[0] = x1_w;
-	x2[0] = x2_s;
-	x3[0] = x3_b;
+	x1[0] = x1_w - dx1;
+	x2[0] = x2_s - dx2;
+	x3[0] = x3_b - dx3;
 
 	// #####################################################
 	// 				block of arrays initialization
 	// #####################################################
 
 	// along the X1 axis
-	for (int j = 0; j < n1 - 1 ; ++j) {
+	for (int j = 0; j < n1 + 1 ; ++j) {
 		x1[j + 1] = x1[j] + dx1;
 	}
 
 	// along the X2 axis
-	for (int i = 0; i < n2 - 1; ++i) {
+	for (int i = 0; i < n2 + 1; ++i) {
 		x2[i + 1] = x2[i] + dx2;
 	}
 
 	// along the X3 axis
-	for (int k = 0; k < n3 - 1; ++k) {
+	for (int k = 0; k < n3 + 1; ++k) {
 		x3[k + 1] = x3[k] + dx3;
 	}
 
-	for (int i = 0; i < n2 - 1; ++i) {
-		for (int j = 0; j < n1 - 1; ++j) {
-			for (int k = 0; k < n3 - 1; ++k) {
+	for (int i = 0; i < n2 + 1; ++i) {
+		for (int j = 0; j < n1 + 1; ++j) {
+			for (int k = 0; k < n3 + 1; ++k) {
 				u1Con[i][j][k] = u1nCon[i][j][k] = u10;
 				u2Con[i][j][k] = u2nCon[i][j][k] = u20;
 				u3Con[i][j][k] = u3nCon[i][j][k] = u30;
@@ -248,9 +247,9 @@ void InitializeData()
 		}
 	}
 
-	for (int i = 0; i < n2; ++i) {
-		for (int j = 0; j < n1; ++j) {
-			for (int k = 0; k < n3; ++k) {
+	for (int i = 0; i < n2 + 2; ++i) {
+		for (int j = 0; j < n1 + 2; ++j) {
+			for (int k = 0; k < n3 + 2; ++k) {
 				p1[i][j][k] = p2[i][j][k] = p3[i][j][k] = 0.;
 				ro1[i][j][k] = ro2[i][j][k] = ro3[i][j][k] = ro0_g;
 				u11[i][j][k] = u12[i][j][k] = u13[i][j][k] = u10;
@@ -269,10 +268,10 @@ void TimeStepSize()
 
 	dt = pow(10, 8);
 
-	for (int i = 1; i < n1; ++i) {
-		for (int j = 1; j < n2; ++j) {
+	for (int i = 1; i < n2; ++i) {
+		for (int j = 1; j < n1; ++j) {
 			for (int k = 1; k < n3; ++k) {
-				x1c = (x1[i+1] + x1[i])/2;
+				x1c = (x1[j+1] + x1[j])/2;
 				x1l = 1+(l-1)*(x1c-1);
 
 				u1_c = u1Con[i][j][k];
@@ -296,8 +295,9 @@ void TimeStepSize()
 				} else {
 					dtv = pow(10, 16);
 				}
-				double dttemp = dtu > dtv ? dtv : dtu;
-				if (dttemp < dt) dt = dttemp;
+				
+				// DT = MIN(DT, DTU, DTV)
+				dt = min3d(dt, dtu, dtv);
 			}
 		}
 	}
@@ -346,16 +346,16 @@ void Phase1()
 	ds2 = dx1*dx3; 
 	ds3 = dx1*dx2;
 
-	for (int i = 1; i < n1; i++)
+	for (int i = 1; i < n2; i++)
 	{
-		for (int j = 1; j < n2; j++)
+		for (int j = 1; j < n1; j++)
 		{
 			for (int k = 1; k < n3; k++)
 			{
 				// geometric factor of cylindricity
-				xle = 1 + (l - 1)*(x1[i] - 1);
+				xle = 1 + (l - 1)*(x1[j] - 1);
 				// geometric factor of cylindricity
-				xlw = 1 + (l - 1)*(x1[i - 1] - 1);
+				xlw = 1 + (l - 1)*(x1[j - 1] - 1);
 				// geometric factor of cylindricity
 				xlt = 0.5*(xle + xlw);
 				// geometric factor of cylindricity
@@ -370,12 +370,12 @@ void Phase1()
 				// #########################################################
 
 				// east plane
-				u1_e = u11[i + 1][j][k];
-				u2_e = u21[i + 1][j][k];
-				u3_e = u31[i + 1][j][k];
-				ro_e = ro1[i + 1][j][k];
-				t_e = t1[i + 1][j][k];
-				p_e = p1[i + 1][j][k];
+				u1_e = u11[i][j + 1][k];
+				u2_e = u21[i][j + 1][k];
+				u3_e = u31[i][j + 1][k];
+				ro_e = ro1[i][j + 1][k];
+				t_e = t1[i][j + 1][k];
+				p_e = p1[i][j + 1][k];
 				// west plane
 				u1_w = u11[i][j][k];
 				u2_w = u21[i][j][k];
@@ -385,12 +385,12 @@ void Phase1()
 				p_w = p1[i][j][k];
 
 				// north plane
-				u1_n = u12[i][j + 1][k];
-				u2_n = u22[i][j + 1][k];
-				u3_n = u32[i][j + 1][k];
-				ro_n = ro2[i][j + 1][k];
-				t_n = t2[i][j + 1][k];
-				p_n = p2[i][j + 1][k];
+				u1_n = u12[i + 1][j][k];
+				u2_n = u22[i + 1][j][k];
+				u3_n = u32[i + 1][j][k];
+				ro_n = ro2[i + 1][j][k];
+				t_n = t2[i + 1][j][k];
+				p_n = p2[i + 1][j][k];
 				// south plane
 				u1_s = u12[i][j][k];
 				u2_s = u22[i][j][k];
@@ -463,44 +463,70 @@ void Phase1()
 		}
 	}
 
-	// periodicity conditions
-	for (int i = 1; i <= n1; ++i)
+	// #####################################################
+	//					boudary conditions
+	// #####################################################
+
+	// periodicity along the X3 axis
+	for (int i = 1; i < n2; ++i)
 	{
-		for (int k = 1; k <= n3; ++k)
+		for (int j = 1; j < n1; ++j)
 		{
 			// periodicity condition on the north plane
-			u1nCon[i][n2][k] = u1nCon[i][1][k];
-			u2nCon[i][n2][k] = u2nCon[i][1][k];
-			u3nCon[i][n2][k] = u3nCon[i][1][k];
-			ronCon[i][n2][k] = ronCon[i][1][k];
-			tnCon[i][n2][k] = tnCon[i][1][k];
-			// periodicity condition on the south plane
-			u1nCon[i][0][k] = u1nCon[i][n2 - 1][k];
-			u2nCon[i][0][k] = u2nCon[i][n2 - 1][k];
-			u3nCon[i][0][k] = u3nCon[i][n2 - 1][k];
-			ronCon[i][0][k] = ronCon[i][n2 - 1][k];
-			tnCon[i][0][k] = tnCon[i][n2 - 1][k];
-		}
-	}	
+			u1nCon[i][j][n3] = u1nCon[i][j][1];
+			u2nCon[i][j][n3] = u2nCon[i][j][1];
+			u3nCon[i][j][n3] = u3nCon[i][j][1];
+			ronCon[i][j][n3] = ronCon[i][j][1];
+			tnCon[i][j][n3] = tnCon[i][j][1];
 
-	// no-slip conditions
-	for (int j = 1; j < n2; ++j)
+			// periodicity condition on the south plane
+			u1nCon[i][j][0] = u1nCon[i][j][n3 - 1];
+			u2nCon[i][j][0] = u2nCon[i][j][n3 - 1];
+			u3nCon[i][j][0] = u3nCon[i][j][n3 - 1];
+			ronCon[i][j][0] = ronCon[i][j][n3 - 1];
+			tnCon[i][j][0] = tnCon[i][j][n3 - 1];
+		}
+	}
+
+	// periodicity along the X2 axis
+	for (int j = 1; j < n1; j++)
+	{
+		for (int k = 1; k < n3; k++)
+		{
+			// periodicity condition on the north plane
+			u1nCon[n2][j][k] = u1nCon[1][j][k];
+			u2nCon[n2][j][k] = u2nCon[1][j][k];
+			u3nCon[n2][j][k] = u3nCon[1][j][k];
+			ronCon[n2][j][k] = ronCon[1][j][k];
+			tnCon[n2][j][k] = tnCon[1][j][k];
+
+			// periodicity condition on the south plane
+			u1nCon[0][j][k] = u1nCon[n2 - 1][j][k];
+			u2nCon[0][j][k] = u2nCon[n2 - 1][j][k];
+			u3nCon[0][j][k] = u3nCon[n2 - 1][j][k];
+			ronCon[0][j][k] = ronCon[n2 - 1][j][k];
+			tnCon[0][j][k] = tnCon[n2 - 1][j][k];
+		}		
+	}
+	
+	// no-slip conditions along the X1 axis
+	for (int i = 1; i < n2; ++i)
 	{
 		for (int k = 1; k < n3; ++k)
 		{
 			// no-slip consition on the west plane
-			u1nCon[0][j][k] = 0.;
-			u2nCon[0][j][k] = 0.;
-			u3nCon[0][j][k] = 0.;
-			ronCon[0][j][k] = ronCon[1][j][k];
-			tnCon[0][j][k] = t0;
+			u1nCon[i][0][k] = 0.;
+			u2nCon[i][0][k] = 0.;
+			u3nCon[i][0][k] = 0.;
+			ronCon[i][0][k] = ronCon[i][1][k];
+			tnCon[i][0][k] = t0;
 
 			// no-slip consition on the east plane
-			u1nCon[n1][j][k] = 0.;
-			u2nCon[n1][j][k] = 0.;
-			u3nCon[n1][j][k] = 0.;
-			ronCon[n1][j][k] = ronCon[n1 - 1][j][k];
-			tnCon[n1][j][k] = t0;
+			u1nCon[i][n1][k] = 0.;
+			u2nCon[i][n1][k] = 0.;
+			u3nCon[i][n1][k] = 0.;
+			ronCon[i][n1][k] = ronCon[i][n1 - 1][k];
+			tnCon[i][n1][k] = t0;
 		}
 	}
 }
@@ -1320,9 +1346,9 @@ void Phase2()
 void StressTensor()
 {
 	// initialization of friction stress arrays
-	for (int i = 0; i <= n1; ++i) {
-		for (int j = 0; j <= n2; ++j) {
-			for (int k = 0; k <= n3; ++k) {
+	for (int i = 0; i < n2 + 2; ++i) {
+		for (int j = 0; j < n1 + 2; ++j) {
+			for (int k = 0; k < n3 + 2; ++k) {
 				sigm11[i][j][k] = 0.0;
 				sigm21[i][j][k] = 0.0;
 				sigm31[i][j][k] = 0.0;
@@ -1339,42 +1365,15 @@ void StressTensor()
 	}
 
 	// #####################################################
-	// 				boundary conditions
-	// #####################################################
-
-	// no-slip condition on the boundary faces perpendicular to x1
-	x1[0] = x1[1];
-	x1[n1+1] = x1[n1];
-
-	for (int j = 1; j < n2 ; ++j) {
-		for (int k = 1; k < n3; ++k) {
-			u1Con[0][j][k] = 0.;
-			u2Con[0][j][k] = 0.;
-			u3Con[0][j][k] = 0.;
-
-			u1Con[n1][j][k] = 0.;
-			u2Con[n1][j][k] = 0.;
-			u3Con[n1][j][k] = 0.;
-		}
-
-	}
-
-	// periodic contition on the boundary faces perpendicular to X2
-	// nothing to do since we have uniform grid
-
-	// periodic contition on the boundary faces perpendicular to X3
-	// nothing to do since we have uniform grid
-
-	// #####################################################
 	// 				bypassing along the faces
 	// #####################################################
 
 	double xle, xlw, xlt, xln, u1_c, u1_ce, u2_c, u2_ce, u3_c, u3_ce;
 
 	// bypassing along the face perpendicular to x1
-	for (int i = 1; i <= n1; ++i) {
-		for (int j = 1; j < n2; ++j) {
-			for (int k = 1; k < n3; ++k) {
+	for (int i = 1; i <= n2; ++i) {
+		for (int j = 1; j <= n1; ++j) {
+			for (int k = 1; k <= n3; ++k) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
 				xle = 1 + (l-1)*(x1[i] - 1);
@@ -1400,14 +1399,14 @@ void StressTensor()
 	double u1_cn, u2_cn, u3_cn;
 
 	// bypassing along the face perpenditcular to X2
-	for (int i = 1; i < n1; ++i) {
-		for (int j = 1; j <= n2; ++j) {
+	for (int i = 1; i <= n2; ++i) {
+		for (int j = 1; j <= n1; ++j) {
 			for (int k = 1; k < n3; ++k) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
-				xle = 1 + (l-1)*(x1[i] - 1);
+				xle = 1 + (l-1)*(x1[j] - 1);
 				// geometric factor of cylindricity
-				xlw = 1 + (l-1)*(x1[i-1] - 1);
+				xlw = 1 + (l-1)*(x1[j-1] - 1);
 				// geometric factor of cylindricity
 				xlt = 0.5*(xle + xlw);
 				// geometric factor of cylindricity
@@ -1434,14 +1433,14 @@ void StressTensor()
 	double u1_ct, u2_ct, u3_ct;
 
 	// bypassing along the face perpenditcular to X3
-	for (int i = 1; i < n1; ++i) {
-		for (int j = 1; j < n2; ++j) {
+	for (int i = 1; i <= n2; ++i) {
+		for (int j = 1; j <= n1; ++j) {
 			for (int k = 1; k <= n3; ++k) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
-				xle = 1 + (l-1)*(x1[i] - 1);
+				xle = 1 + (l-1)*(x1[j] - 1);
 				// geometric factor of cylindricity
-				xlw = 1 + (l-1)*(x1[i-1] - 1);
+				xlw = 1 + (l-1)*(x1[j-1] - 1);
 				// geometric factor of cylindricity
 				xlt = 0.5*(xle + xlw);
 
@@ -1474,14 +1473,14 @@ void StressTensor()
 	ds2 = dx1*dx3;
 	ds3 = dx1*dx2;
 
-	for (int i = 1; i < n1; ++i) {
-		for (int j = 1; j < n2; ++j) {
+	for (int i = 1; i < n2; ++i) {
+		for (int j = 1; j < n1; ++j) {
 			for (int k = 1; k < n3; ++k) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
-				xle = 1 + (l-1)*(x1[i] - 1);
+				xle = 1 + (l-1)*(x1[j] - 1);
 				// geometric factor of cylindricity
-				xlw = 1 + (l-1)*(x1[i-1] - 1);
+				xlw = 1 + (l-1)*(x1[j-1] - 1);
 				// geometric factor of cylindricity
 				xlt = 0.5*(xle + xlw);
 
@@ -1490,21 +1489,21 @@ void StressTensor()
 
 				// friction forces
 				f1[i][j][k] =
-						(sigm11[i+1][j][k] - sigm11[i][j][k]) * ds1 +
-						(sigm12[i][j+1][k] - sigm12[i][j][k]) * ds2 +
-						(sigm13[i][j][k+1] - sigm13[i][j][k]) * ds3 -
-						(l-1)*sigm1c*dx1*dx2*dx3;
+					(sigm11[i][j + 1][k] - sigm11[i][j][k]) * ds1 +
+					(sigm12[i + 1][j][k] - sigm12[i][j][k]) * ds2 +
+					(sigm13[i][j][k + 1] - sigm13[i][j][k]) * ds3 -
+					(l - 1)*sigm1c*dx1*dx2*dx3;
 
 				f2[i][j][k] =
-						(sigm21[i+1][j][k] - sigm21[i][j][k]) * ds1 +
-						(sigm22[i][j+1][k] - sigm22[i][j][k]) * ds2 +
-						(sigm23[i][j][k+1] - sigm23[i][j][k]) * ds3 -
-						(l-1)*sigm2c*dx1*dx2*dx3;
+					(sigm21[i][j + 1][k] - sigm21[i][j][k]) * ds1 +
+					(sigm22[i + 1][j][k] - sigm22[i][j][k]) * ds2 +
+					(sigm23[i][j][k + 1] - sigm23[i][j][k]) * ds3 -
+					(l - 1)*sigm2c*dx1*dx2*dx3;
 
 				f3[i][j][k] =
-						(sigm31[i+1][j][k] - sigm31[i][j][k]) * ds1 +
-						(sigm32[i][j+1][k] - sigm32[i][j][k]) * ds2 +
-						(sigm33[i][j][k+1] - sigm33[i][j][k]) * ds3;
+					(sigm31[i][j + 1][k] - sigm31[i][j][k]) * ds1 +
+					(sigm32[i + 1][j][k] - sigm32[i][j][k]) * ds2 +
+					(sigm33[i][j][k + 1] - sigm33[i][j][k]) * ds3;
 			}
 		}
 	}
@@ -1515,12 +1514,12 @@ void UseForces()
 {
 	double xle, xlw, dvc, ro_c, ro_cn;
 
-	for (int i = 1; i < n1; ++i) {
-		for (int j = 1; j < n2; ++j) {
+	for (int i = 1; i < n2; ++i) {
+		for (int j = 1; j < n1; ++j) {
 			for (int k = 1; k < n3; ++k) {
 				// geometric factor of cylindricity
-				xle = 1+(l-1)*(x1[i+1]-1);
-				xlw = 1+(l-1)*(x1[i]-1);
+				xle = 1+(l-1)*(x1[j+1]-1);
+				xlw = 1+(l-1)*(x1[j]-1);
 				// cell volume
 				dvc = 0.5*(xle+xlw)*dx1*dx2*dx3;
 
@@ -1594,9 +1593,9 @@ void WriteDataParaView()
 	fprintf(fd, "\nCELL_DATA %d\nscalars U1 float\nLOOKUP_TABLE default\n", (n1-1)*(n2-1)*(n3-1));
 	for (int k = 1; k < n3; k++)
 	{
-		for (int i = 1; i < n1; i++)
+		for (int i = 1; i < n2; i++)
 		{
-			for (int j = 1; j < n2; j++)
+			for (int j = 1; j < n1; j++)
 			{
 				fprintf(fd, "%f ", u1nCon[i][j][k]);
 			}
@@ -1606,9 +1605,9 @@ void WriteDataParaView()
 	fprintf(fd, "\nscalars U2 float\nLOOKUP_TABLE default\n");
 	for (int k = 1; k < n3; k++)
 	{
-		for (int i = 1; i < n1; i++)
+		for (int i = 1; i < n2; i++)
 		{
-			for (int j = 1; j < n2; j++)
+			for (int j = 1; j < n1; j++)
 			{
 				fprintf(fd, "%f ", u2nCon[i][j][k]);
 			}
@@ -1618,9 +1617,9 @@ void WriteDataParaView()
 	fprintf(fd, "\nscalars U3 float\nLOOKUP_TABLE default\n");
 	for (int k = 1; k < n3; k++)
 	{
-		for (int i = 1; i < n1; i++)
+		for (int i = 1; i < n2; i++)
 		{
-			for (int j = 1; j < n2; j++)
+			for (int j = 1; j < n1; j++)
 			{
 				fprintf(fd, "%f ", u3nCon[i][j][k]);
 			}
@@ -1630,9 +1629,9 @@ void WriteDataParaView()
 	fprintf(fd, "\nscalars PC float\nLOOKUP_TABLE default\n");
 	for (int k = 1; k < n3; k++)
 	{
-		for (int i = 1; i < n1; i++)
+		for (int i = 1; i < n2; i++)
 		{
-			for (int j = 1; j < n2; j++)
+			for (int j = 1; j < n1; j++)
 			{
 				fprintf(fd, "%f ", ronCon[i][j][k]);
 			}
@@ -1642,9 +1641,9 @@ void WriteDataParaView()
 	fprintf(fd, "\nscalars TC float\nLOOKUP_TABLE default\n");
 	for (int k = 1; k < n3; k++)
 	{
-		for (int i = 1; i < n1; i++)
+		for (int i = 1; i < n2; i++)
 		{
-			for (int j = 1; j < n2; j++)
+			for (int j = 1; j < n1; j++)
 			{
 				fprintf(fd, "%f ", tnCon[i][j][k]);
 			}
@@ -1660,42 +1659,42 @@ void FreeMemory()
 	free(x2);
 	free(x3);
 
-	deallocate3D(roCon, n1, n2);
-	deallocate3D(u1Con, n1, n2);
-	deallocate3D(u2Con, n1, n2);
-	deallocate3D(u3Con, n1, n2);
-	deallocate3D(tCon, n1, n2);
+	deallocate3D(roCon, n2 + 1, n1 + 1);
+	deallocate3D(u1Con, n2 + 1, n1 + 1);
+	deallocate3D(u2Con, n2 + 1, n1 + 1);
+	deallocate3D(u3Con, n2 + 1, n1 + 1);
+	deallocate3D(tCon, n2 + 1, n1 + 1);
 
-	deallocate3D(ronCon, n1, n2);
-	deallocate3D(u1nCon, n1, n2);
-	deallocate3D(u2nCon, n1, n2);
-	deallocate3D(u3nCon, n1, n2);
-	deallocate3D(tnCon, n1, n2);
+	deallocate3D(ronCon, n2 + 1, n1 + 1);
+	deallocate3D(u1nCon, n2 + 1, n1 + 1);
+	deallocate3D(u2nCon, n2 + 1, n1 + 1);
+	deallocate3D(u3nCon, n2 + 1, n1 + 1);
+	deallocate3D(tnCon, n2 + 1, n1 + 1);
 
-	deallocate3D(ro1, n1+1, n2);
-	deallocate3D(t1, n1+1, n2);
-	deallocate3D(u11, n1+1, n2);
-	deallocate3D(u21, n1+1, n2);
-	deallocate3D(u31, n1+1, n2);
-	deallocate3D(p1, n1+1, n2);
+	deallocate3D(ro1, n2 + 2, n1 + 2);
+	deallocate3D(t1, n2 + 2, n1 + 2);
+	deallocate3D(u11, n2 + 2, n1 + 2);
+	deallocate3D(u21, n2 + 2, n1 + 2);
+	deallocate3D(u31, n2 + 2, n1 + 2);
+	deallocate3D(p1, n2 + 2, n1 + 2);
 
-	deallocate3D(ro2, n1, n2+1);
-	deallocate3D(t2, n1, n2+1);
-	deallocate3D(u12, n1, n2+1);
-	deallocate3D(u22, n1, n2+1);
-	deallocate3D(u32, n1, n2+1);
-	deallocate3D(p2, n1, n2+1);
+	deallocate3D(ro2, n2 + 2, n1 + 2);
+	deallocate3D(t2, n2 + 2, n1 + 2);
+	deallocate3D(u12, n2 + 2, n1 + 2);
+	deallocate3D(u22, n2 + 2, n1 + 2);
+	deallocate3D(u32, n2 + 2, n1 + 2);
+	deallocate3D(p2, n2 + 2, n1 + 2);
 
-	deallocate3D(ro3, n1, n2);
-	deallocate3D(t3, n1, n2);
-	deallocate3D(u13, n1, n2);
-	deallocate3D(u23, n1, n2);
-	deallocate3D(u33, n1, n2);
-	deallocate3D(p3, n1, n2);
+	deallocate3D(ro3, n2 + 2, n1 + 2);
+	deallocate3D(t3, n2 + 2, n1 + 2);
+	deallocate3D(u13, n2 + 2, n1 + 2);
+	deallocate3D(u23, n2 + 2, n1 + 2);
+	deallocate3D(u33, n2 + 2, n1 + 2);
+	deallocate3D(p3, n2 + 2, n1 + 2);
 
-	deallocate3D(f1, n1, n2);
-	deallocate3D(f2, n1, n2);
-	deallocate3D(f3, n1, n2);
+	deallocate3D(f1, n2 + 1, n1 + 1);
+	deallocate3D(f2, n2 + 1, n1 + 1);
+	deallocate3D(f3, n2 + 1, n1 + 1);
 
 	free(rBuf);
 	free(qBuf);
@@ -1706,17 +1705,17 @@ void FreeMemory()
 	free(u3fBuf);
 	free(u3bBuf);
 
-	deallocate3D(sigm11, n1, n2);
-	deallocate3D(sigm21, n1, n2);
-	deallocate3D(sigm31, n1, n2);
+	deallocate3D(sigm11, n2 + 2, n1 + 2);
+	deallocate3D(sigm21, n2 + 2, n1 + 2);
+	deallocate3D(sigm31, n2 + 2, n1 + 2);
 
-	deallocate3D(sigm12, n1, n2);
-	deallocate3D(sigm22, n1, n2);
-	deallocate3D(sigm32, n1, n2);
+	deallocate3D(sigm12, n2 + 2, n1 + 2);
+	deallocate3D(sigm22, n2 + 2, n1 + 2);
+	deallocate3D(sigm32, n2 + 2, n1 + 2);
 
-	deallocate3D(sigm13, n1, n2);
-	deallocate3D(sigm23, n1, n2);
-	deallocate3D(sigm33, n1, n2);
+	deallocate3D(sigm13, n2 + 2, n1 + 2);
+	deallocate3D(sigm23, n2 + 2, n1 + 2);
+	deallocate3D(sigm33, n2 + 2, n1 + 2);
 }
 
 double ***allocate3D(int n1, int n2, int n3)
