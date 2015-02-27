@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _BULK_H
 #define _BULK_H
 
@@ -90,4 +89,4 @@ double ***p3, ***ro3, ***u13, ***u23, ***u33, ***t3;
 
 double *rBuf, *qBuf, *tfBuf, *tbBuf, *u2fBuf, *u2bBuf, *u3fBuf, *u3bBuf;
 
-#endif
+#endif /* _BULK_H */

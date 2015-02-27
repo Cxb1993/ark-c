@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _CONSTANTS_H
 #define _CONSTANTS_H
 
@@ -20,9 +19,11 @@
 //	u1Inlet	-	speed on the bottom border along the x1 axis
 //	tInlet	-	temperature on the bottom border
 
-double sound, ro0_g, ro0_s, dt, VIS, u10, u20, u30, t0, TIME, CFL, pOutlet, u3Inlet, u2Inlet, u1Inlet, tInlet;
+double sound, ro0_g, ro0_s, dt, VIS, u10, u20, u30, t0, TIME, CFL, pOutlet;
+double u3Inlet, u2Inlet, u1Inlet, tInlet;
 
-const double PI = 3.141592653589793239;
-
+#ifndef M_PI
+    #define M_PI 3.1415926535897932384626433832795
 #endif
 
+#endif /* _CONSTANTS_H */
