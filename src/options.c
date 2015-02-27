@@ -15,7 +15,7 @@ Options parseOptions(int argc, char *argv[])
 Options init()
 {
 	Options opt;
-	opt.mode = -1;
+	opt.mode = 0;
     opt.program_name = opt.version_name = opt.version_number = 0;
 	opt.debug_mode = 0;
 
@@ -25,6 +25,14 @@ Options init()
 
     opt.input_file = opt.output_file = 0;
     opt.gpu_mode = 0;
+	return opt;
+}
+
+Options checkOptions(Options opt)
+{
+	if (!opt.index_geometry || !opt.n1g || !opt.n2g || !opt.n3g || !opt.nPrint ||
+		!opt.nStop || !opt.delta || !opt.kappa || !opt.cfl || !opt.kappa || !opt.cfl)
+		opt.mode = -1;
 	return opt;
 }
 
@@ -128,11 +136,6 @@ Options parse(int argc, char *argv[])
     }
     //if (optind != argc - 1)
         //error_mode = true; // TODO: error
-	return opt;
-}
-
-Options checkOptions(Options opt)
-{
 	return opt;
 }
 

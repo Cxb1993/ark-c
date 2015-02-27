@@ -40,6 +40,3 @@ VERSION_NUMBER = 1.0.0
 
 # имя бинарника
 PROG_NAME = kovcheg
-
-# компилятор
-FC = mpif90

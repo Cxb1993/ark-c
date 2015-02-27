@@ -3,11 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
+#include "getopt.h"
 
-char *error_option;
 
-    //bool help_mode, version_mode, error_mode;
 typedef struct _Options {
 	int mode;
     const char *program_name;

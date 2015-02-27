@@ -79,12 +79,11 @@ all: build
 
 build: mkdir $(OBJ_MODULES)
 	echo Compiling program.....
-	$(PRINT)$(CXX) $(CFLAGS) -L/opt/cuda/lib64 $(filter-out mkdir, $^) -o $(BIN_NOW)/$(BINARY_NAME) $(CFLAGSLIB) -lcudart
+	$(PRINT)$(CC) $(CFLAGS) $(filter-out mkdir, $^) -o $(BIN_NOW)/$(BINARY_NAME) $(CFLAGSLIB)
 
 # запуск
 run:
 	$(PRINT)$(RUN) ./$(BIN_NOW)/$(BINARY_NAME) $(ARGUMENTS)
-	#$(PRINT)$(RUN) ./$(BIN_NOW)/$(BINARY_NAME) $(ARGUMENTS) > $(FILE_OUTPUT)
 
 rebuild: clean_exec build
 
