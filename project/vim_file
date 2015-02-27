@@ -1,0 +1,13 @@
+:e src/main.c
+:tabnew include/bulk.h
+:60 vs include/constants.h
+:tabnew src/phases.c
+:60 vs include/phases.h
+:tabnew src/stress.c
+:60 vs include/stress.h
+:tabnew src/init.c
+:60 vs include/init.h
+:tabnew src/free.c
+:60 vs include/free.h
+:tabnew src/options.c
+:60 vs include/options.h
