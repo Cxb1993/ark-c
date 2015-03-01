@@ -133,7 +133,7 @@ void Phase1()
 				t_c = tCon[i][j][k];
 				
 				// #####################################################
-				//					new values evaluating
+				//		new values evaluating
 				// #####################################################
 
 				// new density
@@ -175,7 +175,7 @@ void Phase1()
 	}
 
 	// #####################################################
-	//					boudary conditions
+	//		boudary conditions
 	// #####################################################
 
 	// periodicity along the X3 axis
@@ -183,14 +183,14 @@ void Phase1()
 	{
 		for (int j = 1; j < n1; ++j)
 		{
-			// periodicity condition on the north plane
+			// periodicity conditions on the north plane
 			u1nCon[i][j][n3] = u1nCon[i][j][1];
 			u2nCon[i][j][n3] = u2nCon[i][j][1];
 			u3nCon[i][j][n3] = u3nCon[i][j][1];
 			ronCon[i][j][n3] = ronCon[i][j][1];
 			tnCon[i][j][n3] = tnCon[i][j][1];
 
-			// periodicity condition on the south plane
+			// periodicity conditions on the south plane
 			u1nCon[i][j][0] = u1nCon[i][j][n3 - 1];
 			u2nCon[i][j][0] = u2nCon[i][j][n3 - 1];
 			u3nCon[i][j][0] = u3nCon[i][j][n3 - 1];
@@ -204,14 +204,14 @@ void Phase1()
 	{
 		for (int k = 1; k < n3; k++)
 		{
-			// periodicity condition on the north plane
+			// periodicity conditions on the north plane
 			u1nCon[n2][j][k] = u1nCon[1][j][k];
 			u2nCon[n2][j][k] = u2nCon[1][j][k];
 			u3nCon[n2][j][k] = u3nCon[1][j][k];
 			ronCon[n2][j][k] = ronCon[1][j][k];
 			tnCon[n2][j][k] = tnCon[1][j][k];
 
-			// periodicity condition on the south plane
+			// periodicity conditions on the south plane
 			u1nCon[0][j][k] = u1nCon[n2 - 1][j][k];
 			u2nCon[0][j][k] = u2nCon[n2 - 1][j][k];
 			u3nCon[0][j][k] = u3nCon[n2 - 1][j][k];
@@ -225,14 +225,14 @@ void Phase1()
 	{
 		for (int k = 1; k < n3; ++k)
 		{
-			// no-slip consition on the west plane
+			// no-slip conditions on the west plane
 			u1nCon[i][0][k] = 0.;
 			u2nCon[i][0][k] = 0.;
 			u3nCon[i][0][k] = 0.;
 			ronCon[i][0][k] = ronCon[i][1][k];
 			tnCon[i][0][k] = t0;
 
-			// no-slip consition on the east plane
+			// no-slip conditions on the east plane
 			u1nCon[i][n1][k] = 0.;
 			u2nCon[i][n1][k] = 0.;
 			u3nCon[i][n1][k] = 0.;
@@ -264,43 +264,43 @@ void Phase2()
 	// then by taking into account the boundary condition calculates extreme elements of the buffers
 	// and only then calculates the flow variables
 
-	// flow variables calculation on DS1 faces orthogonal x1 axis 
+	// flow variables calculation on DS1 faces orthogonal X1 axis 
 
-	// bypassing along the x1 axis
+	// bypassing along the X1 axis
 
 	// only interior faces !
 	for (int k = 1; k < n3; k++)
 	{
-		for (int j = 1; j < n2; j++)
+		for (int i = 1; i < n2; i++)
 		{
-			for (int i = 1; i < n1; i++)
+			for (int j = 1; j < n1; j++)
 			{
-				u1_f = u11[i + 1][j][k];
+				u1_f = u11[i][j + 1][k];
 				u1_b = u11[i][j][k];
 				u1_cn = u1nCon[i][j][k];
 				u1_c = u1Con[i][j][k];
 
-				u2_f = u21[i + 1][j][k];
+				u2_f = u21[i][j + 1][k];
 				u2_b = u21[i][j][k];
 				u2_cn = u2nCon[i][j][k];
 				u2_c = u2Con[i][j][k];
 
-				u3_f = u31[i + 1][j][k];
+				u3_f = u31[i][j + 1][k];
 				u3_b = u31[i][j][k];
 				u3_cn = u3nCon[i][j][k];
 				u3_c = u3Con[i][j][k];
 
-				ro_f = ro1[i + 1][j][k];
+				ro_f = ro1[i][j + 1][k];
 				ro_b = ro1[i][j][k];
 				ro_cn = roCon[i][j][k];
 				ro_c = roCon[i][j][k];
 
-				t_f = t1[i + 1][j][k];
+				t_f = t1[i][j + 1][k];
 				t_b = t1[i][j][k];
 				t_cn = tnCon[i][j][k];
 				t_c = tCon[i][j][k];
 
-				p_f = p1[i + 1][j][k];
+				p_f = p1[i][j + 1][k];
 				p_b = p1[i][j][k];
 				p_cn = sound*sound*(ro_cn - ro0_g);
 				p_c = sound*sound*(ro_c - ro0_g);
@@ -339,44 +339,34 @@ void Phase2()
 				gu3 = 2 * (u3_cn - u3_c) / dt + u1_cn*(u3_f - u3_b) / dx1;
 
 				// RMAX=MAX(RF,RC,RB) +dt*GR
-				rmax = max3d(r_f, r_c, r_b);
-				rmax += dt*gr;
+				rmax = max3d(r_f, r_c, r_b) + dt*gr;
 
 				// RMIN=MIN(RF,RC,RB) +dt*GR
-				rmin = min3d(r_f, r_c, r_b);
-				rmin += dt*gr;
+				rmin = min3d(r_f, r_c, r_b) + dt*gr;
 
 				// QMAX=MAX(QF,QC,QB) +dt*GQ
-				qmax = max3d(q_f, q_c, q_b);
-				qmax += dt*gq;
+				qmax = max3d(q_f, q_c, q_b) + dt*gq;
 
 				// QMIN=MIN(QF,QC,QB) +dt*GQ
-				qmin = min3d(q_f, q_c, q_b);
-				qmin += dt*gq;
+				qmin = min3d(q_f, q_c, q_b) + dt*gq;
 
 				// TMAX=MAX(TF,TC,TB) +dt*GT
-				tmax = max3d(t_f, t_c, t_b);
-				tmax += dt*gt;
+				tmax = max3d(t_f, t_c, t_b) + dt*gt;
 
 				// TMIN=MIN(TF,TC,TB) +dt*GT
-				tmin = min3d(t_f, t_c, t_b);
-				tmin += dt*gt;
+				tmin = min3d(t_f, t_c, t_b) + dt*gt;
 
 				// U2MAX=MAX(U2F,U2C,U2B) +dt*GU2
-				u2_max = max3d(u2_f, u2_c, u2_b);
-				u2_max += dt*gu2;
+				u2_max = max3d(u2_f, u2_c, u2_b) + dt*gu2;
 
 				// U2MIN=MIN(U2F,U2C,U2B) +dt*GU2
-				u2_min = min3d(u2_f, u2_c, u2_b);
-				u2_min += dt*gu2;
+				u2_min = min3d(u2_f, u2_c, u2_b) + dt*gu2;
 
 				// U3MAX=MAX(U3F,U3C,U3B) +dt*GU3
-				u3_max = max3d(u3_f, u3_c, u3_b);
-				u3_max += dt*gu3;
+				u3_max = max3d(u3_f, u3_c, u3_b) + dt*gu3;
 
 				// U3MIN=MIN(U3F,U3C,U3B) +dt*GU3 
-				u3_min = min3d(u3_f, u3_c, u3_b);
-				u3_min += dt*gu3;
+				u3_min = min3d(u3_f, u3_c, u3_b) + dt*gu3;
 
 				// invariants correction
 				if (r_fn > rmax) r_fn = rmax;
@@ -414,7 +404,7 @@ void Phase2()
 				u3bBuf[i] = u3_bn;
 			}
 
-			// boundary conditions along the x1 axis
+			// boundary conditions along the X1 axis
 			// assignment of boundary invatiants and add them to the buffer arrays
 
 			// periodicity conditions
@@ -430,49 +420,49 @@ void Phase2()
 			u3bBuf[n1] = u3bBuf[1];
 
 			// no-slip conditions
-			// i == 1
-			ro0_b = ronCon[n1 - 1][j][k];
-			ro0_f = ronCon[1][j][k];
+			// j == 1
+			ro0_b = ronCon[i][n1 - 1][k];
+			ro0_f = ronCon[i][1][k];
 
 			qn = qBuf[1];
 			un = 0;
 			pn = -qn*sound*ro0_g;
-			ro_n = (ro0_g + pn / (sound*sound));
+			ro_n = ro0_g + pn / (sound*sound);
 
 			tn = t0;
 			u2_n = 0;
 			u3_n = 0;
 
-			p1[1][j][k] = pn;
-			u11[1][j][k] = un;
-			ro1[1][j][k] = ro_n;
-			t1[1][j][k] = tn;
-			u21[1][j][k] = u2_n;
-			u31[1][j][k] = u3_n;
+			p1[i][1][k] = pn;
+			u11[i][1][k] = un;
+			ro1[i][1][k] = ro_n;
+			t1[i][1][k] = tn;
+			u21[i][1][k] = u2_n;
+			u31[i][1][k] = u3_n;
 
 
-			// i == n1
+			// j == n1
 			rn = rBuf[n1];
 
 			un = 0;
 			pn = rn*sound*ro0_g;
-			ro_n = (ro0_g + pn / (sound*sound));
+			ro_n = ro0_g + pn / (sound*sound);
 
 			tn = t0;
 			u2_n = 0;
 			u3_n = 0;
 
-			p1[n1][j][k] = pn;
-			u11[n1][j][k] = un;
-			ro1[n1][j][k] = ro_n;
-			t1[n1][j][k] = tn;
-			u21[n1][j][k] = u2_n;
-			u31[n1][j][k] = u3_n;
+			p1[i][n1][k] = pn;
+			u11[i][n1][k] = un;
+			ro1[i][n1][k] = ro_n;
+			t1[i][n1][k] = tn;
+			u21[i][n1][k] = u2_n;
+			u31[i][n1][k] = u3_n;
 
 			// the flow variables calculations
-			for (int i = 2; i < n1; i++)
+			for (int j = 2; j < n1; j++)
 			{
-				ro0_b = ronCon[i - 1][j][k];
+				ro0_b = ronCon[i][j - 1][k];
 				ro0_f = ronCon[i][j][k];
 
 				rn = rBuf[i];
@@ -481,46 +471,43 @@ void Phase2()
 				pn = (rn - qn)*sound*ro0_g / 2;
 				un = (rn + qn) / 2;
 
-				ro_n = (ro0_g + pn / (sound*sound));
+				ro_n = ro0_g + pn / (sound*sound);
 
 				ucf = u1nCon[i][j][k];
-				ucb = u1nCon[i - 1][j][k];
+				ucb = u1nCon[i][j - 1][k];
 
-				if (ucf >= 0 && ucb > 0)
+				if (ucf > 0 && ucb > 0)
 				{
-					tn = tfBuf[i];
-					u2_n = u2fBuf[i];
-					u3_n = u3fBuf[i];
+					tn = tfBuf[j];
+					u2_n = u2fBuf[j];
+					u3_n = u3fBuf[j];
 				}
 				else if (ucf <= 0 && ucb <= 0)
 				{
-					tn = tbBuf[i];
-					u2_n = u2bBuf[i];
-					u3_n = u3bBuf[i];
+					tn = tbBuf[j];
+					u2_n = u2bBuf[j];
+					u3_n = u3bBuf[j];
 				}
 				else if (ucb >= 0 && ucf <= 0) 
 				{
 					if (ucb > -ucf) 
 					{
-						tn = tfBuf[i];
-						u2_n = u2fBuf[i];
-						u3_n = u3fBuf[i];
+						tn = tfBuf[j];
+						u2_n = u2fBuf[j];
+						u3_n = u3fBuf[j];
 					}
 					else 
 					{
-						tn = tbBuf[i];
-						u2_n = u2bBuf[i];
-						u3_n = u3bBuf[i];
+						tn = tbBuf[j];
+						u2_n = u2bBuf[j];
+						u3_n = u3bBuf[j];
 					}
 				}
-				else
+				else if (ucb < 0 && ucf > 0)
 				{
-					if (ucb <= 0 && ucf >= 0)
-					{
-						tn = tnCon[i][j][k] + tnCon[i - 1][j][k] - t1[i][j][k];
-						u2_n = u2nCon[i][j][k] + u2nCon[i - 1][j][k] - u21[i][j][k];
-						u3_n = u3nCon[i][j][k] + u3nCon[i - 1][j][k] - u31[i][j][k];
-					}
+					tn = tnCon[i][j][k] + tnCon[i][j - 1][k] - t1[i][j][k];
+					u2_n = u2nCon[i][j][k] + u2nCon[i][j - 1][k] - u21[i][j][k];
+					u3_n = u3nCon[i][j][k] + u3nCon[i][j - 1][k] - u31[i][j][k];
 				}
 
 				p1[i][j][k] = pn;
@@ -530,14 +517,6 @@ void Phase2()
 				u21[i][j][k] = u2_n;
 				u31[i][j][k] = u3_n;
 			}
-
-			// the flow variable calculations on the east border
-			p1[1][j][k] = p1[n1][j][k];
-			u11[1][j][k] = u11[n1][j][k];
-			ro1[1][j][k] = ro1[n1][j][k];
-			t1[1][j][k] = t1[n1][j][k];
-			u21[1][j][k] = u21[n1][j][k];
-			u31[1][j][k] = u31[n1][j][k];
 		}
 	}
 
@@ -555,40 +534,40 @@ void Phase2()
 
 	for (int k = 1; k < n3; k++)
 	{
-		for (int i = 1; i < n1; i++)
+		for (int j = 1; j < n1; j++)
 		{
-			xle = 1 + (l - 1)*(x1[i + 1] - 1);
-			xlw = 1 + (l - 1)*(x1[i] - 1);
+			xle = 1 + (l - 1)*(x1[j + 1] - 1);
+			xlw = 1 + (l - 1)*(x1[j] - 1);
 			xls = 0.5*(xle + xlw);
 			
-			for (int j = 0; j <= n2; j++)
+			for (int i = 1; i < n2; i++)
 			{
-				u2_f = u22[i][j + 1][k];
+				u2_f = u22[i + 1][j][k];
 				u2_b = u22[i][j][k];
 				u2_cn = u2nCon[i][j][k];
 				u2_c = u2Con[i][j][k];
 
-				u1_f = u12[i][j + 1][k];
+				u1_f = u12[i + 1][j][k];
 				u1_b = u12[i][j][k];
 				u1_cn = u1nCon[i][j][k];
 				u1_c = u1Con[i][j][k];
 
-				u3_f = u32[i][j + 1][k];
+				u3_f = u32[i + 1][j][k];
 				u3_b = u32[i][j][k];
 				u3_cn = u3nCon[i][j][k];
 				u3_c = u3Con[i][j][k];
 
-				ro_f = ro2[i][j + 1][k];
+				ro_f = ro2[i + 1][j][k];
 				ro_b = ro2[i][j][k];
 				ro_cn = ronCon[i][j][k];
 				ro_c = roCon[i][j][k];
 
-				t_f = t2[i][j + 1][k];
+				t_f = t2[i + 1][j][k];
 				t_b = t2[i][j][k];
 				t_cn = tnCon[i][j][k];
 				t_c = tCon[i][j][k];
 
-				p_f = p2[i][j + 1][k];
+				p_f = p2[i + 1][j][k];
 				p_b = p2[i][j][k];
 				p_cn = sound*sound*(ro_cn - ro0_g);
 				p_c = sound*sound*(ro_c - ro0_g);
@@ -626,44 +605,34 @@ void Phase2()
 
 
 				// RMAX=MAX(RF,RC,RB) +dt*GR
-				rmax = max3d(r_f, r_c, r_b);
-				rmax += dt*gr;
+				rmax = max3d(r_f, r_c, r_b) + dt*gr;
 
 				// RMIN=MIN(RF,RC,RB) +dt*GR
-				rmin = min3d(r_f, r_c, r_b);
-				rmin += dt*gr;
+				rmin = min3d(r_f, r_c, r_b) + dt*gr;
 
 				// QMAX=MAX(QF,QC,QB) +dt*GQ
-				qmax = max3d(q_f, q_c, q_b);
-				qmax += dt*gq;
+				qmax = max3d(q_f, q_c, q_b) + dt*gq;
 
 				// QMIN=MIN(QF,QC,QB) +dt*GQ
-				qmin = min3d(q_f, q_c, q_b);
-				qmin += dt*gq;
+				qmin = min3d(q_f, q_c, q_b) + dt*gq;
 
 				// TMAX=MAX(TF,TC,TB) +dt*GT
-				tmax = max3d(t_f, t_c, t_b);
-				tmax += dt*gt;
+				tmax = max3d(t_f, t_c, t_b) + dt*gt;
 
 				// TMIN=MIN(TF,TC,TB) +dt*GT
-				tmin = min3d(t_f, t_c, t_b);
-				tmin += dt*gt;
+				tmin = min3d(t_f, t_c, t_b) + dt*gt;
 
 				// U1MAX=MAX(U1F,U1C,U1B) +dt*GU1
-				u1_max = max3d(u1_f, u1_c, u1_b);
-				u1_max += dt*gu1;
+				u1_max = max3d(u1_f, u1_c, u1_b) + dt*gu1;
 
 				// U1MIN=MIN(U1F,U1C,U1B) +dt*GU1
-				u1_min = min3d(u1_f, u1_c, u1_b);
-				u1_min += dt*gu1;
+				u1_min = min3d(u1_f, u1_c, u1_b) + dt*gu1;
 
 				// U3MAX=MAX(U3F,U3C,U3B) +dt*GU3
-				u3_max = max3d(u3_f, u3_c, u3_b);
-				u3_max += dt*gu3;
+				u3_max = max3d(u3_f, u3_c, u3_b) + dt*gu3;
 
 				// U3MIN=MIN(U3F,U3C,U3B) +dt*GU3 
-				u3_min = min3d(u3_f, u3_c, u3_b);
-				u3_min += dt*gu3;
+				u3_min = min3d(u3_f, u3_c, u3_b) + dt*gu3;
 
 				// invariants correction
 				if (r_fn > rmax) r_fn = rmax;
@@ -691,14 +660,20 @@ void Phase2()
 				if (u3_bn < u3_min) u3_bn = u3_min;
 
 				// put invariants to buffers
-				rBuf[j + 1] = r_fn;
-				qBuf[j] = q_bn;
-				tfBuf[j + 1] = t_fn;
-				tbBuf[j] = t_bn;
-				u2fBuf[j + 1] = u1_fn;
-				u2bBuf[j] = u1_bn;
-				u3fBuf[j + 1] = u3_fn;
-				u3bBuf[j] = u3_bn;
+				// ==================================================
+				// !!! IMPORTANT !!!
+				// ==================================================
+				// u2fBuf and u2bBuf is actially is u1fBuf and u1bBuf
+				// It's not an error. We do it to save dynamic memory
+				// ==================================================
+				rBuf[i + 1] = r_fn;
+				qBuf[i] = q_bn;
+				tfBuf[i + 1] = t_fn;
+				tbBuf[i] = t_bn;
+				u2fBuf[i + 1] = u1_fn;
+				u2bBuf[i] = u1_bn;
+				u3fBuf[i + 1] = u3_fn;
+				u3bBuf[i] = u3_bn;
 			}
 
 			// boundary conditions along the X2 axis
@@ -717,27 +692,27 @@ void Phase2()
 			u3bBuf[n2] = u3bBuf[1];
 
 			// the flow variables calculations
-			for (int j = 1; j <= n2; j++)
+			for (int i = 1; i <= n2; i++)
 			{
-				ro0_b = ronCon[i][j - 1][k];
+				ro0_b = ronCon[i - 1][j][k];
 				ro0_f = ronCon[i][j][k];
 
-				rn = rBuf[j];
-				qn = qBuf[j];
+				rn = rBuf[i];
+				qn = qBuf[i];
 
 				pn = (rn - qn)*sound*ro0_g / 2;
 				un = (rn + qn) / 2;
 
-				ro_n = (ro0_g + pn / (sound*sound));
+				ro_n = ro0_g + pn / (sound*sound);
 
 				ucf = u2nCon[i][j][k];
-				ucb = u2nCon[i][j - 1][k];
+				ucb = u2nCon[i - 1][j][k];
 
-				if (ucf >= 0 && ucb > 0)
+				if (ucf > 0 && ucb > 0)
 				{
-					tn = tfBuf[j];
-					u1_n = u2fBuf[j];
-					u3_n = u3fBuf[j];
+					tn = tfBuf[i];
+					u1_n = u2fBuf[i];
+					u3_n = u3fBuf[i];
 				}
 				else if (ucf <= 0 && ucb <= 0)
 				{
@@ -761,13 +736,11 @@ void Phase2()
 					}
 				}
 				else
+				if (ucb < 0 && ucf > 0)
 				{
-					if (ucb <= 0 && ucf >= 0)
-					{
-						tn = tnCon[i][j][k] + tnCon[i][j - 1][k] - t2[i][j][k];
-						u1_n = u1nCon[i][j][k] + u1nCon[i][j - 1][k] - u12[i][j][k];
-						u3_n = u3nCon[i][j][k] + u3nCon[i][j - 1][k] - u32[i][j][k];
-					}
+					tn = tnCon[i][j][k] + tnCon[i - 1][j][k] - t2[i][j][k];
+					u1_n = u1nCon[i][j][k] + u1nCon[i - 1][j][k] - u12[i][j][k];
+					u3_n = u3nCon[i][j][k] + u3nCon[i - 1][j][k] - u32[i][j][k];
 				}
 
 				p2[i][j][k] = pn;
@@ -777,14 +750,6 @@ void Phase2()
 				u12[i][j][k] = u1_n;
 				u32[i][j][k] = u3_n;
 			}
-
-			// the flow variable calculations on the south border
-			p2[i][1][k] = p2[i][n2][k];
-			u22[i][1][k] = u22[i][n2][k];
-			ro2[i][1][k] = ro2[i][n2][k];
-			t2[i][1][k] = t2[i][n2][k];
-			u12[i][1][k] = u12[i][n2][k];
-			u32[i][1][k] = u32[i][n2][k];
 		}
 	}
 
@@ -792,9 +757,9 @@ void Phase2()
 
 	// bypassing along the X3 axis
 
-	for (int j = 1; j < n2; j++)
+	for (int i = 1; i < n2; i++)
 	{
-		for (int i = 1; i < n1; i++)
+		for (int j = 1; j < n1; j++)
 		{
 			for (int k = 1; k < n3; k++)
 			{
@@ -803,15 +768,15 @@ void Phase2()
 				u3_cn = u3nCon[i][j][k];
 				u3_c = u3Con[i][j][k];
 
-				u2_f = u23[i][j][k + 1];
-				u2_b = u23[i][j][k];
-				u2_cn = u2nCon[i][j][k];
-				u2_c = u2Con[i][j][k];
-
 				u1_f = u13[i][j][k + 1];
 				u1_b = u13[i][j][k];
 				u1_cn = u1nCon[i][j][k];
 				u1_c = u1Con[i][j][k];
+
+				u2_f = u23[i][j][k + 1];
+				u2_b = u23[i][j][k];
+				u2_cn = u2nCon[i][j][k];
+				u2_c = u2Con[i][j][k];
 
 				ro_f = ro3[i][j][k + 1];
 				ro_b = ro3[i][j][k];
@@ -857,48 +822,38 @@ void Phase2()
 				gq = 2 * (r_cn - r_c) / dt + (u3_cn - sound)*(q_f - q_b) / dx3;
 
 				gt = 2 * (t_cn - t_c) / dt + u3_cn*(t_f - t_b) / dx3;
-				gu2 = 2 * (u2_cn - u2_c) / dt + u3_cn*(u2_f - u2_b) / dx3;
 				gu1 = 2 * (u1_cn - u1_c) / dt + u3_cn*(u1_f - u1_b) / dx3;
+				gu2 = 2 * (u2_cn - u2_c) / dt + u3_cn*(u2_f - u2_b) / dx3;
 
 				// RMAX=MAX(RF,RC,RB) +dt*GR
-				rmax = max3d(r_f, r_c, r_b);
-				rmax += dt*gr;
+				rmax = max3d(r_f, r_c, r_b) + dt*gr;
 
 				// RMIN=MIN(RF,RC,RB) +dt*GR
-				rmin = min3d(r_f, r_c, r_b);
-				rmin += dt*gr;
+				rmin = min3d(r_f, r_c, r_b) + dt*gr;
 
 				// QMAX=MAX(QF,QC,QB) +dt*GQ
-				qmax = max3d(q_f, q_c, q_b);
-				qmax += dt*gq;
+				qmax = max3d(q_f, q_c, q_b) + dt*gq;
 
 				// QMIN=MIN(QF,QC,QB) +dt*GQ
-				qmin = min3d(q_f, q_c, q_b);
-				qmin += dt*gq;
+				qmin = min3d(q_f, q_c, q_b) + dt*gq;
 
 				// TMAX=MAX(TF,TC,TB) +dt*GT
-				tmax = max3d(t_f, t_c, t_b);
-				tmax += dt*gt;
+				tmax = max3d(t_f, t_c, t_b) + dt*gt;
 
 				// TMIN=MIN(TF,TC,TB) +dt*GT
-				tmin = min3d(t_f, t_c, t_b);
-				tmin += dt*gt;
-
-				// U2MAX=MAX(U2F,U2C,U2B) +dt*GU2
-				u2_max = max3d(u2_f, u2_c, u2_b);
-				u2_max += dt*gu2;
-
-				// U2MIN=MIN(U2F,U2C,U2B) +dt*GU2
-				u2_min = min3d(u2_f, u2_c, u2_b);
-				u2_min += dt*gu2;
+				tmin = min3d(t_f, t_c, t_b) + dt*gt;
 
 				// U1MAX=MAX(U1F,U1C,U1B) +dt*GU1
-				u1_max = max3d(u1_f, u1_c, u1_b);
-				u1_max += dt*gu1;
+				u1_max = max3d(u1_f, u1_c, u1_b) + dt*gu1;
 
 				// U1MIN=MIN(U1F,U1C,U1B) +dt*GU1
-				u1_min = min3d(u1_f, u1_c, u1_b);
-				u1_min += dt*gu1;
+				u1_min = min3d(u1_f, u1_c, u1_b) + dt*gu1;
+
+				// U2MAX=MAX(U2F,U2C,U2B) +dt*GU2
+				u2_max = max3d(u2_f, u2_c, u2_b) + dt*gu2;
+
+				// U2MIN=MIN(U2F,U2C,U2B) +dt*GU2
+				u2_min = min3d(u2_f, u2_c, u2_b) + dt*gu2;
 
 				// invariants correction
 				if (r_fn > rmax) r_fn = rmax;
@@ -913,27 +868,34 @@ void Phase2()
 				if (t_bn > tmax) t_bn = tmax;
 				if (t_bn < tmin) t_bn = tmin;
 
-				if (u2_fn > u2_max) u2_fn = u2_max;
-				if (u2_fn < u2_min) u2_fn = u2_min;
-
-				if (u2_bn > u2_max) u2_bn = u2_max;
-				if (u2_bn < u2_min) u2_bn = u2_min;
-
 				if (u1_fn > u1_max) u1_fn = u1_max;
 				if (u1_fn < u1_min) u1_fn = u1_min;
 
 				if (u1_bn > u1_max) u1_bn = u1_max;
 				if (u1_bn < u1_min) u1_bn = u1_min;
 
+				if (u2_fn > u2_max) u2_fn = u2_max;
+				if (u2_fn < u2_min) u2_fn = u2_min;
+
+				if (u2_bn > u2_max) u2_bn = u2_max;
+				if (u2_bn < u2_min) u2_bn = u2_min;
+
 				// put invariants to buffers
+				// ====================================================
+				// !!! IMPORTANT !!!
+				// ====================================================
+				// u2fBuf and u2bBuf are actially the u1fBuf and u1bBuf
+				// u3fBuf and u3bBuf are actially the u2fBuf and u2bBuf
+				// It's not an error. We do it to save dynamic memory
+				// ====================================================
 				rBuf[k + 1] = r_fn;
 				qBuf[k] = q_bn;
 				tfBuf[k + 1] = t_fn;
 				tbBuf[k] = t_bn;
 				u2fBuf[k + 1] = u1_fn;
 				u2bBuf[k] = u1_bn;
-				u3fBuf[k + 1] = u1_fn;
-				u3bBuf[k] = u1_bn;
+				u3fBuf[k + 1] = u2_fn;
+				u3bBuf[k] = u2_bn;
 			}
 
 			// boundary conditions along the X3 axis
@@ -968,41 +930,39 @@ void Phase2()
 				ucf = u3nCon[i][j][k];
 				ucb = u3nCon[i][j][k - 1];
 
-				if (ucf >= 0 && ucb > 0)
+				if (ucf > 0 && ucb > 0)
 				{
 					tn = tfBuf[j];
-					u2_n = u2fBuf[j];
-					u1_n = u3fBuf[j];
+					u1_n = u2fBuf[j];
+					u2_n = u3fBuf[j];
 				}
 				else if (ucf <= 0 && ucb <= 0)
 				{
 					tn = tbBuf[j];
-					u2_n = u2bBuf[j];
-					u1_n = u3bBuf[j];
+					u1_n = u2bBuf[j];
+					u2_n = u3bBuf[j];
 				}
 				else if (ucb >= 0 && ucf <= 0)
 				{
 					if (ucb > -ucf)
 					{
 						tn = tfBuf[j];
-						u2_n = u2fBuf[j];
-						u1_n = u3fBuf[j];
+						u1_n = u2fBuf[j];
+						u2_n = u3fBuf[j];
 					}
 					else
 					{
 						tn = tbBuf[j];
-						u2_n = u2bBuf[j];
-						u1_n = u3bBuf[j];
+						u1_n = u2bBuf[j];
+						u2_n = u3bBuf[j];
 					}
 				}
 				else
+				if (ucb <= 0 && ucf >= 0)
 				{
-					if (ucb <= 0 && ucf >= 0)
-					{
-						tn = tnCon[i][j][k] + tnCon[i][j][k - 1] - t3[i][j][k];
-						u2_n = u2nCon[i][j][k] + u2nCon[i][j][k - 1] - u23[i][j][k];
-						u1_n = u1nCon[i][j][k] + u1nCon[i][j][k - 1] - u13[i][j][k];
-					}
+					tn = tnCon[i][j][k] + tnCon[i][j][k - 1] - t3[i][j][k];
+					u1_n = u1nCon[i][j][k] + u1nCon[i][j][k - 1] - u13[i][j][k];
+					u2_n = u2nCon[i][j][k] + u2nCon[i][j][k - 1] - u23[i][j][k];
 				}
 
 				p3[i][j][k] = pn;
@@ -1013,43 +973,35 @@ void Phase2()
 				u13[i][j][k] = u1_n;
 			}
 
-			// the flow variable calculations on the bottom border
-			p3[i][j][1] = p3[i][j][n3];
-			u33[i][j][1] = u33[i][j][n3];
-			ro3[i][j][1] = ro3[i][j][n3];
-			t3[i][j][1] = t3[i][j][n3];
-			u23[i][j][1] = u23[i][j][n3];
-			u13[i][j][1] = u13[i][j][n3];
-
 			// inlet conditions
-			qn = qBuf[1];
-			rn = u3Inlet + (ronCon[i][j][1] - ro0_g)*sound / ro0_g;
-			un = (rn + qn) / 2;
-			pn = (rn - qn)*sound*ro0_g / 2;
-			ro_n = ro0_g + pn / sound / sound;
-			u2_n = u2Inlet;
-			u1_n = u1Inlet;
-			tn = tInlet;
-			p3[i][j][1] = pn;
-			u33[i][j][1] = un;
-			ro3[i][j][1] = ro_n;
-			t3[i][j][1] = tn;
-			u23[i][j][1] = u2_n;
-			u13[i][j][1] = u1_n;
+			//qn = qBuf[1];
+			//rn = u3Inlet + (ronCon[i][j][1] - ro0_g)*sound / ro0_g;
+			//un = (rn + qn) / 2;
+			//pn = (rn - qn)*sound*ro0_g / 2;
+			//ro_n = ro0_g + pn / sound / sound;
+			//u2_n = u2Inlet;
+			//u1_n = u1Inlet;
+			//tn = tInlet;
+			//p3[i][j][1] = pn;
+			//u33[i][j][1] = un;
+			//ro3[i][j][1] = ro_n;
+			//t3[i][j][1] = tn;
+			//u23[i][j][1] = u2_n;
+			//u13[i][j][1] = u1_n;
 
 			// outlet conditions
-			rn = rBuf[n3];
-			pn = pOutlet;
-			un = rn - pn / ro0_g / sound;
-			tn = tfBuf[n3];
-			u2_n = u2fBuf[n3];
-			u1_n = u3fBuf[n3];
-			p3[i][j][n3] = pn;
-			u33[i][j][n3] = un;
-			ro3[i][j][n3] = ro_n;
-			t3[i][j][n3] = tn;
-			u23[i][j][n3] = u2_n;
-			u13[i][j][n3] = u1_n;
+			//rn = rBuf[n3];
+			//pn = pOutlet;
+			//un = rn - pn / ro0_g / sound;
+			//tn = tfBuf[n3];
+			//u2_n = u2fBuf[n3];
+			//u1_n = u3fBuf[n3];
+			//p3[i][j][n3] = pn;
+			//u33[i][j][n3] = un;
+			//ro3[i][j][n3] = ro_n;
+			//t3[i][j][n3] = tn;
+			//u23[i][j][n3] = u2_n;
+			//u13[i][j][n3] = u1_n;
 		}
 	}
 }
