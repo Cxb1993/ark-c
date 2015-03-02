@@ -51,16 +51,15 @@ int main (int argc, char** argv)
 		UseForces();
 		TIME += 0.5*dt;
 
-		if (nStep % nPrint == 0)
+		if (nStep % nPrint == 0) {
 			WriteDataParaView(opt.output_file, nStep);
-		printf("step: %d dt:%E\n", nStep, dt);
+			printf("step: %d dt:%E\n", nStep, dt);
+		}
 	} while (nStep < nStop);
 	FreeMemory();
     return 0;
 }
 
-// input: l, n1, n2, n3, x1, u1Con, u2Con, u3Con, CFL, dx1, dx2, dx3, VIS;
-// output: dt;
 void TimeStepSize()
 {
 	double x1c, x1l, u1_c, u2_c, u3_c, dtu1, dtu2, dtu3, dtu, dtv1, dtv2, dtv3, dtv;
@@ -82,8 +81,7 @@ void TimeStepSize()
 				dtu3 = CFL*dx3/(sound + fabs(u3_c));
 
 				// DTU = MIN(DTU1, DTU2, DTU3)
-				dtu = dtu1 > dtu2 ? dtu2 : dtu1;
-				dtu = dtu > dtu3 ? dtu3 : dtu;
+				dtu = min3d(dtu1, dtu2, dtu3);
 
 				if (VIS > pow(10, -16)) {
 					dtv1 = CFL*dx1*dx1/(2.*VIS);
@@ -91,19 +89,19 @@ void TimeStepSize()
 					dtv3 = CFL*dx3*dx3/(2.*VIS);
 
 					// DTV = MIN (DTV1, DTV2, DTV3)
-					dtv = dtv1 > dtv2 ? dtv2 : dtv1;
-					dtv = dtv > dtv3 ? dtv3 : dtv;
+					dtv = min3d(dtv1, dtv2, dtv3);
 				} else {
 					dtv = pow(10, 16);
 				}
 
 				// DT = MIN(DT, DTU, DTV)
-				dt = dt > dtu ? dtu : dt;
-				dt = dt > dtv ? dtv : dt;
+				dt = min3d(dt, dtu, dtv);
 			}
 		}
 	}
 }
+
+
 
 // input:  TIME, n1, n2, n3, x1, x2, x3, u1Con, u2Con, u3Con, ronCon, tnCon
 // output: nothing

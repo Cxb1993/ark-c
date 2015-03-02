@@ -24,8 +24,8 @@ void Phase1()
 			for (int k = 1; k < n3; k++)
 			{
 				u1Con[i][j][k] = u1nCon[i][j][k];
-				u1Con[i][j][k] = u1nCon[i][j][k];
-				u1Con[i][j][k] = u1nCon[i][j][k];
+				u2Con[i][j][k] = u2nCon[i][j][k];
+				u3Con[i][j][k] = u3nCon[i][j][k];
 				roCon[i][j][k] = ronCon[i][j][k];
 				tCon[i][j][k] = tnCon[i][j][k];
 			}
@@ -133,7 +133,7 @@ void Phase1()
 				t_c = tCon[i][j][k];
 				
 				// #####################################################
-				//		new values evaluating
+				//				new values evaluating
 				// #####################################################
 
 				// new density
@@ -143,11 +143,11 @@ void Phase1()
 				// new conservative velocity along the x1 axis
 				double u1_cp = (ro_c*u1_c*dvc - 0.5*dt*((ro_n*u2_n*u1_n - ro_s*u2_s*u1_s)*ds2 +
 					(xlt*ro_t*u3_t*u1_t - xlb*ro_b*u3_b*u1_b)*ds3 +
-					(xle*(ro_e*u1_e*ro_e*u1_e + p_e) - xlw*(ro_w*u1_w*ro_w*u1_w + p_w))*ds1
+					(xle*(ro_e*u1_e*u1_e + p_e) - xlw*(ro_w*u1_w*u1_w + p_w))*ds1
 					- 0.5*(l - 1)*(p_e + p_w)*dx1*dx2*dx3)) / (dvc*ro_cn);
 				// new conservative velocity along the X2 axis
 				double u2_cp = (ro_c*u2_c*dvc - 0.5*dt*((xle*ro_e*u1_e*u2_e - xlw*ro_w*u1_w*u2_w)*ds1 +
-					((ro_n*u2_n*ro_n*u2_n + p_n) - (ro_s*u2_s*ro_s*u2_s + p_s))*ds2 +
+					((ro_n*u2_n*u2_n + p_n) - (ro_s*u2_s*u2_s + p_s))*ds2 +
 					(xlt*ro_t*u3_t*u2_t - xlb*ro_b*u3_b*u2_b)*ds3)) / (dvc*ro_cn);
 
 				// take into account of centrifugal and Coriolis forces
@@ -157,7 +157,7 @@ void Phase1()
 				// new conservative velocity along the X3 axis
 				u3_cn = (ro_c*u3_c*dvc - 0.5*dt*((xle*ro_e*u1_e*u3_e - xlw*ro_w*u1_w*u3_w)*ds1 +
 					(ro_n*u2_n*u3_n - ro_s*u2_s*u3_s)*ds2 +
-					(xlt*(ro_t*u3_t*ro_t*u3_t + p_t) - xlb*(ro_b*u3_b*ro_b*u3_b + p_b))*ds3)) / (dvc*ro_cn);
+					(xlt*(ro_t*u3_t*u3_t + p_t) - xlb*(ro_b*u3_b*u3_b + p_b))*ds3)) / (dvc*ro_cn);
 
 				// new temperature
 				t_cn = (ro_c*t_c*dvc - 0.5*dt*((xle*ro_e*t_e*u1_e - xlw*ro_w*t_w*u1_w)*ds1 +
@@ -175,7 +175,7 @@ void Phase1()
 	}
 
 	// #####################################################
-	//		boudary conditions
+	// 					boudary conditions
 	// #####################################################
 
 	// periodicity along the X3 axis
@@ -253,8 +253,7 @@ void Phase2()
 		r_f, r_fn, r_b, r_cn, r_c,
 		q_f, q_b, q_bn, q_cn, q_c;
 
-	double gr, gt, gu2, gu3,
-		gq;
+	double gr, gt, gu2, gu3, gq;
 
 	double rmax, rmin, qmax, qmin, tmax, tmin, u2_max, u2_min, u3_max, u3_min;
 
@@ -292,7 +291,7 @@ void Phase2()
 
 				ro_f = ro1[i][j + 1][k];
 				ro_b = ro1[i][j][k];
-				ro_cn = roCon[i][j][k];
+				ro_cn = ronCon[i][j][k];
 				ro_c = roCon[i][j][k];
 
 				t_f = t1[i][j + 1][k];
@@ -394,30 +393,30 @@ void Phase2()
 				if (u3_bn < u3_min) u3_bn = u3_min;
 
 				// put invariants to buffers
-				rBuf[i + 1] = r_fn;
-				qBuf[i] = q_bn;
-				tfBuf[i + 1] = t_fn;
-				tbBuf[i] = t_bn;
-				u2fBuf[i + 1] = u2_fn;
-				u2bBuf[i] = u2_bn;
-				u3fBuf[i + 1] = u3_fn;
-				u3bBuf[i] = u3_bn;
+				rBuf[j + 1] = r_fn;
+				qBuf[j] = q_bn;
+				tfBuf[j + 1] = t_fn;
+				tbBuf[j] = t_bn;
+				u2fBuf[j + 1] = u2_fn;
+				u2bBuf[j] = u2_bn;
+				u3fBuf[j + 1] = u3_fn;
+				u3bBuf[j] = u3_bn;
 			}
 
 			// boundary conditions along the X1 axis
 			// assignment of boundary invatiants and add them to the buffer arrays
 
 			// periodicity conditions
-			rBuf[1] = rBuf[n1];
+			/*rBuf[1] = rBuf[n1];
 			tfBuf[1] = tfBuf[n1];
 			u2fBuf[1] = u2fBuf[n1];
-			u3fBuf[1] = u3fBuf[n1];
+			u3fBuf[1] = u3fBuf[n1];*/
 
 			// periodicity conditions
-			qBuf[n1] = qBuf[1];
+			/*qBuf[n1] = qBuf[1];
 			tbBuf[n1] = tbBuf[1];
 			u2bBuf[n1] = u2bBuf[1];
-			u3bBuf[n1] = u3bBuf[1];
+			u3bBuf[n1] = u3bBuf[1];*/
 
 			// no-slip conditions
 			// j == 1
@@ -465,8 +464,8 @@ void Phase2()
 				ro0_b = ronCon[i][j - 1][k];
 				ro0_f = ronCon[i][j][k];
 
-				rn = rBuf[i];
-				qn = qBuf[i];
+				rn = rBuf[j];
+				qn = qBuf[j];
 
 				pn = (rn - qn)*sound*ro0_g / 2;
 				un = (rn + qn) / 2;
@@ -476,7 +475,7 @@ void Phase2()
 				ucf = u1nCon[i][j][k];
 				ucb = u1nCon[i][j - 1][k];
 
-				if (ucf > 0 && ucb > 0)
+				if (ucf >= 0 && ucb >= 0)
 				{
 					tn = tfBuf[j];
 					u2_n = u2fBuf[j];
@@ -503,7 +502,7 @@ void Phase2()
 						u3_n = u3bBuf[j];
 					}
 				}
-				else if (ucb < 0 && ucf > 0)
+				else if (ucb <= 0 && ucf >= 0)
 				{
 					tn = tnCon[i][j][k] + tnCon[i][j - 1][k] - t1[i][j][k];
 					u2_n = u2nCon[i][j][k] + u2nCon[i][j - 1][k] - u21[i][j][k];
@@ -663,7 +662,7 @@ void Phase2()
 				// ==================================================
 				// !!! IMPORTANT !!!
 				// ==================================================
-				// u2fBuf and u2bBuf is actially is u1fBuf and u1bBuf
+				// u2fBuf and u2bBuf are actially the u1fBuf and u1bBuf
 				// It's not an error. We do it to save dynamic memory
 				// ==================================================
 				rBuf[i + 1] = r_fn;
@@ -708,7 +707,7 @@ void Phase2()
 				ucf = u2nCon[i][j][k];
 				ucb = u2nCon[i - 1][j][k];
 
-				if (ucf > 0 && ucb > 0)
+				if (ucf >= 0 && ucb >= 0)
 				{
 					tn = tfBuf[i];
 					u1_n = u2fBuf[i];
@@ -716,27 +715,27 @@ void Phase2()
 				}
 				else if (ucf <= 0 && ucb <= 0)
 				{
-					tn = tbBuf[j];
-					u1_n = u2bBuf[j];
-					u3_n = u3bBuf[j];
+					tn = tbBuf[i];
+					u1_n = u2bBuf[i];
+					u3_n = u3bBuf[i];
 				}
 				else if (ucb >= 0 && ucf <= 0)
 				{
 					if (ucb > -ucf)
 					{
-						tn = tfBuf[j];
-						u1_n = u2fBuf[j];
-						u3_n = u3fBuf[j];
+						tn = tfBuf[i];
+						u1_n = u2fBuf[i];
+						u3_n = u3fBuf[i];
 					}
 					else
 					{
-						tn = tbBuf[j];
-						u1_n = u2bBuf[j];
-						u3_n = u3bBuf[j];
+						tn = tbBuf[i];
+						u1_n = u2bBuf[i];
+						u3_n = u3bBuf[i];
 					}
 				}
 				else
-				if (ucb < 0 && ucf > 0)
+				if (ucb <= 0 && ucf >= 0)
 				{
 					tn = tnCon[i][j][k] + tnCon[i - 1][j][k] - t2[i][j][k];
 					u1_n = u1nCon[i][j][k] + u1nCon[i - 1][j][k] - u12[i][j][k];
@@ -925,12 +924,12 @@ void Phase2()
 				pn = (rn - qn)*sound*ro0_g / 2;
 				un = (rn + qn) / 2;
 
-				ro_n = (ro0_g + pn / (sound*sound));
+				ro_n = ro0_g + pn / (sound*sound);
 
 				ucf = u3nCon[i][j][k];
 				ucb = u3nCon[i][j][k - 1];
 
-				if (ucf > 0 && ucb > 0)
+				if (ucf >= 0 && ucb >= 0)
 				{
 					tn = tfBuf[j];
 					u1_n = u2fBuf[j];
@@ -969,39 +968,39 @@ void Phase2()
 				u33[i][j][k] = un;
 				ro3[i][j][k] = ro_n;
 				t3[i][j][k] = tn;
-				u23[i][j][k] = u2_n;
 				u13[i][j][k] = u1_n;
+				u23[i][j][k] = u2_n;
 			}
 
 			// inlet conditions
-			//qn = qBuf[1];
-			//rn = u3Inlet + (ronCon[i][j][1] - ro0_g)*sound / ro0_g;
-			//un = (rn + qn) / 2;
-			//pn = (rn - qn)*sound*ro0_g / 2;
-			//ro_n = ro0_g + pn / sound / sound;
-			//u2_n = u2Inlet;
-			//u1_n = u1Inlet;
-			//tn = tInlet;
-			//p3[i][j][1] = pn;
-			//u33[i][j][1] = un;
-			//ro3[i][j][1] = ro_n;
-			//t3[i][j][1] = tn;
-			//u23[i][j][1] = u2_n;
-			//u13[i][j][1] = u1_n;
+			/*qn = qBuf[1];
+			rn = u3Inlet + (ronCon[i][j][1] - ro0_g)*sound / ro0_g;
+			un = (rn + qn) / 2;
+			pn = (rn - qn)*sound*ro0_g / 2;
+			ro_n = ro0_g + pn / sound / sound;
+			u2_n = u2Inlet;
+			u1_n = u1Inlet;
+			tn = tInlet;
+			p3[i][j][1] = pn;
+			u33[i][j][1] = un;
+			ro3[i][j][1] = ro_n;
+			t3[i][j][1] = tn;
+			u23[i][j][1] = u2_n;
+			u13[i][j][1] = u1_n;*/
 
 			// outlet conditions
-			//rn = rBuf[n3];
-			//pn = pOutlet;
-			//un = rn - pn / ro0_g / sound;
-			//tn = tfBuf[n3];
-			//u2_n = u2fBuf[n3];
-			//u1_n = u3fBuf[n3];
-			//p3[i][j][n3] = pn;
-			//u33[i][j][n3] = un;
-			//ro3[i][j][n3] = ro_n;
-			//t3[i][j][n3] = tn;
-			//u23[i][j][n3] = u2_n;
-			//u13[i][j][n3] = u1_n;
+			/*rn = rBuf[n3];
+			pn = pOutlet;
+			un = rn - pn / ro0_g / sound;
+			tn = tfBuf[n3];
+			u2_n = u2fBuf[n3];
+			u1_n = u3fBuf[n3];
+			p3[i][j][n3] = pn;
+			u33[i][j][n3] = un;
+			ro3[i][j][n3] = ro_n;
+			t3[i][j][n3] = tn;
+			u23[i][j][n3] = u2_n;
+			u13[i][j][n3] = u1_n;*/
 		}
 	}
 }

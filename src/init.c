@@ -42,6 +42,7 @@ void Input(Options opt)
 	// Courant number
 	CFL = opt.cfl;
 
+
 	// kinematic viscosity
 	VIS = 0.5/50.;  // 0.5
 	// initial temperature
@@ -76,9 +77,9 @@ void Input(Options opt)
 	// #####################################################
 
 	// coordinates of grid nodes along the all of the axises
-	x1 = calloc(n1, sizeof(double));
-	x2 = calloc(n2, sizeof(double));
-	x3 = calloc(n3, sizeof(double));
+	x1 = calloc(n1 + 2, sizeof(double));
+	x2 = calloc(n2 + 2, sizeof(double));
+	x3 = calloc(n3 + 2, sizeof(double));
 
 	// variables on the current time step
 	roCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
@@ -93,6 +94,8 @@ void Input(Options opt)
 	u1nCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
 	u2nCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
 	u3nCon = allocate3D(n2 + 1, n1 + 1, n3 + 1);
+
+	allocateForces(n1, n2, n3);
 
 	// variables perpendicular to the axis x1
 	ro1 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
@@ -119,7 +122,8 @@ void Input(Options opt)
 	p3 = allocate3D(n2 + 2, n1 + 2, n3 + 2);
 
 	// NMAX = MAX(n1, n2, n3)
-	int nmax = n1 < n2 ? n2 : n1;
+	int nmax;
+	nmax = n1 < n2 ? n2 : n1;
 	nmax = nmax < n3 ? n3 : nmax;
 
 	// additional buffers for phase 2
@@ -132,9 +136,9 @@ void Input(Options opt)
 	u3fBuf	= calloc((nmax+2), sizeof(double));
 	u3bBuf	= calloc((nmax+2), sizeof(double));
 
-    allocateForces(n1, n2, n3);
-    allocateStress(n1, n2, n3);
+	allocateStress(n1, n2, n3);
 }
+
 
 void InitializeData()
 {
@@ -152,7 +156,7 @@ void InitializeData()
 	x3[0] = x3_b - dx3;
 
 	// #####################################################
-	//        block of arrays initialization
+	//			block of arrays initialization
 	// #####################################################
 
 	// along the X1 axis

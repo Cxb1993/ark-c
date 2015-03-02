@@ -67,10 +67,6 @@ void deallocateStress(int n1, int n2, int n3)
 	deallocate3D(sigm33, n2 + 2, n1 + 2);
 }
 
-
-// input: n1, n2, n3, l, x1, u1Con, u2Con, u3Con, VIS, dx1, dx2, dx3
-// output: sigm11, sigm21, sigm31, sigm12, sigm22, sigm32, sigm13, sigm23, sigm33
-// output: f1, f2, f3
 void StressTensor()
 {
 	// initialization of friction stress arrays
@@ -92,29 +88,97 @@ void StressTensor()
 		}
 	}
 
+
+	// #####################################################
+	// 					boudary conditions
+	// #####################################################
+
+	// periodicity along the X3 axis
+	for (int i = 1; i < n2; ++i)
+	{
+		for (int j = 1; j < n1; ++j)
+		{
+			// periodicity conditions on the north plane
+			u1Con[i][j][n3] = u1Con[i][j][1];
+			u2Con[i][j][n3] = u2Con[i][j][1];
+			u3Con[i][j][n3] = u3Con[i][j][1];
+			roCon[i][j][n3] = roCon[i][j][1];
+			tCon[i][j][n3] = tCon[i][j][1];
+
+			// periodicity conditions on the south plane
+			u1Con[i][j][0] = u1Con[i][j][n3 - 1];
+			u2Con[i][j][0] = u2Con[i][j][n3 - 1];
+			u3Con[i][j][0] = u3Con[i][j][n3 - 1];
+			roCon[i][j][0] = roCon[i][j][n3 - 1];
+			tCon[i][j][0] = tCon[i][j][n3 - 1];
+		}
+	}
+
+	// periodicity along the X2 axis
+	for (int j = 1; j < n1; j++)
+	{
+		for (int k = 1; k < n3; k++)
+		{
+			// periodicity conditions on the north plane
+			u1Con[n2][j][k] = u1nCon[1][j][k];
+			u2Con[n2][j][k] = u2nCon[1][j][k];
+			u3Con[n2][j][k] = u3nCon[1][j][k];
+			roCon[n2][j][k] = ronCon[1][j][k];
+			tCon[n2][j][k] = tnCon[1][j][k];
+
+			// periodicity conditions on the south plane
+			u1Con[0][j][k] = u1Con[n2 - 1][j][k];
+			u2Con[0][j][k] = u2Con[n2 - 1][j][k];
+			u3Con[0][j][k] = u3Con[n2 - 1][j][k];
+			roCon[0][j][k] = roCon[n2 - 1][j][k];
+			tCon[0][j][k] = tCon[n2 - 1][j][k];
+		}
+	}
+
+	// no-slip conditions along the X1 axis
+	for (int i = 1; i < n2; ++i)
+	{
+		for (int k = 1; k < n3; ++k)
+		{
+			// no-slip conditions on the west plane
+			u1Con[i][0][k] = 0.;
+			u2Con[i][0][k] = 0.;
+			u3Con[i][0][k] = 0.;
+			roCon[i][0][k] = roCon[i][1][k];
+			tCon[i][0][k] = t0;
+			
+			// no-slip conditions on the east plane
+			u1Con[i][n1][k] = 0.;
+			u2Con[i][n1][k] = 0.;
+			u3Con[i][n1][k] = 0.;
+			roCon[i][n1][k] = roCon[i][n1 - 1][k];
+			tCon[i][n1][k] = t0;
+		}
+	}
+
 	// #####################################################
 	// 				bypassing along the faces
 	// #####################################################
 
 	double xle, xlw, xlt, xln, u1_c, u1_ce, u2_c, u2_ce, u3_c, u3_ce;
 
-	// bypassing along the face perpendicular to x1
+	// bypassing along the face perpendicular to X1
 	for (int i = 1; i <= n2; ++i) {
-		for (int j = 1; j <= n1; ++j) {
-			for (int k = 1; k <= n3; ++k) {
+		for (int k = 1; k <= n3; ++k) {
+			for (int j = 1; j <= n1; ++j) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
-				xle = 1 + (l-1)*(x1[i] - 1);
+				xle = 1 + (l-1)*(x1[j] - 1);
 
 				// velocity components in cell centers
 				u1_c = u1Con[i][j][k];
-				u1_ce = u1Con[i-1][j][k];
+				u1_ce = u1Con[i][j - 1][k];
 
 				u2_c = u2Con[i][j][k];
-				u2_ce = u2Con[i-1][j][k];
+				u2_ce = u2Con[i][j - 1][k];
 
 				u3_c = u3Con[i][j][k];
-				u3_ce = u3Con[i-1][j][k];
+				u3_ce = u3Con[i][j - 1][k];
 
 				// friction stress
 				sigm11[i][j][k]=-VIS*xle*(u1_ce-u1_c)/dx1;
@@ -127,9 +191,9 @@ void StressTensor()
 	double u1_cn, u2_cn, u3_cn;
 
 	// bypassing along the face perpenditcular to X2
-	for (int i = 1; i <= n2; ++i) {
-		for (int j = 1; j <= n1; ++j) {
-			for (int k = 1; k < n3; ++k) {
+	for (int j = 1; j <= n1; ++j) {
+		for (int k = 1; k <= n3; ++k) {
+			for (int i = 1; i <= n2; ++i) {
 				// geometric characteristics of the computational cell
 				// geometric factor of cylindricity
 				xle = 1 + (l-1)*(x1[j] - 1);
@@ -142,13 +206,13 @@ void StressTensor()
 
 				// velocity components in cell centers
 				u1_c = u1Con[i][j][k];
-				u1_cn = u1Con[i][j-1][k];
+				u1_cn = u1Con[i - 1][j][k];
 
 				u2_c = u2Con[i][j][k];
-				u2_cn = u2Con[i][j-1][k];
+				u2_cn = u2Con[i - 1][j][k];
 
 				u3_c = u3Con[i][j][k];
-				u3_cn = u3Con[i][j-1][k];
+				u3_cn = u3Con[i - 1][j][k];
 
 				// friction stress
 				sigm12[i][j][k]=-VIS*((u1_cn-u1_c)/dx2 -(l-1)*(u2_c+u2_cn))/xln;
@@ -237,8 +301,6 @@ void StressTensor()
 	}
 }
 
-// input: l, n1, n2, n3, x1, dx1, dx2, dx3, roCon, ronCon, dt
-// output: u1nCon, u2nCon, u3nCon
 void UseForces()
 {
 	double xle, xlw, dvc, ro_c, ro_cn;

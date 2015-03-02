@@ -1,0 +1,10 @@
+#!/bin/bash
+
+I=100
+LIMIT=3000
+
+while [ "$I" -le "$LIMIT" ]
+do
+	diff $HOME/scratch/ark-c/output/out_$I.vtk $HOME/scratch/ark-c-one-file/ark-c/out_$I.vtk
+	I=`expr $I + 100`
+done
