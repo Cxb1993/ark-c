@@ -1,3 +1,8 @@
+bin/
+obj/
+output/
+config.mk
+
 #################
 ## Eclipse
 #################

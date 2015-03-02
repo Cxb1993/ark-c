@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include "getopt.h"
 
 
@@ -10,6 +11,7 @@ typedef struct _Options {
 	int mode;
     const char *program_name;
     const char *version_name, *version_number;
+	const char *error_message;
 	int debug_mode;
 
 	int index_geometry, n1g, n2g, n3g, nPrint, nStop;

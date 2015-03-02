@@ -2,11 +2,7 @@
 
 void FreeMemory()
 {
-	free(x1);
-	free(x2);
-	free(x3);
-
-	deallocate3D(roCon, n2 + 1, n1 + 1);
+	//deallocate3D(roCon, n2 + 1, n1 + 1);
 	deallocate3D(u1Con, n2 + 1, n1 + 1);
 	deallocate3D(u2Con, n2 + 1, n1 + 1);
 	deallocate3D(u3Con, n2 + 1, n1 + 1);
@@ -50,6 +46,12 @@ void FreeMemory()
 	free(u2bBuf);
 	free(u3fBuf);
 	free(u3bBuf);
+
+	/*
+	free(x1);
+	free(x2);
+	free(x3);
+	*/
 }
 
 void deallocate3D(double*** arr, int n1, int n2)
@@ -61,5 +63,4 @@ void deallocate3D(double*** arr, int n1, int n2)
 		free(arr[i]);
 	}
 	free(arr);
-	arr = NULL;
 }

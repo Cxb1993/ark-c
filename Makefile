@@ -61,7 +61,7 @@ LIBRARY ?=
 
 # FLAGS := $(FLAGSCOMMON) $(FLAGSGOAL) $(FLAGSINCLUDES) $(FLAGLIBS) 
 CUFLAGSGOAL = -arch=sm_20 -Xptxas -v -ccbin mpiCC
-CFLAGSCOMMON += -std=c99
+CFLAGSCOMMON += -std=c99 -g
 
 PRINT = @
 
@@ -82,7 +82,7 @@ build: mkdir $(OBJ_MODULES)
 	$(PRINT)$(CC) $(CFLAGS) $(filter-out mkdir, $^) -o $(BIN_NOW)/$(BINARY_NAME) $(CFLAGSLIB)
 
 # запуск
-run:
+run: mkdir
 	$(PRINT)$(RUN) ./$(BIN_NOW)/$(BINARY_NAME) $(ARGUMENTS)
 
 rebuild: clean_exec build

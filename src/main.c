@@ -11,8 +11,8 @@
 #include "options.h"
 
 void TimeStepSize();
-void WriteData();
-void WriteDataParaView();
+void WriteData(char *file, int step);
+void WriteDataParaView(char *file, int step);
 
 int main (int argc, char** argv)
 {
@@ -32,10 +32,8 @@ int main (int argc, char** argv)
 		return -1;
 	}
 
-
 	Input(opt);
 	InitializeData();
-	return 0;
 
 	nStep = 0;
 	TIME = 0.0;
@@ -53,7 +51,8 @@ int main (int argc, char** argv)
 		UseForces();
 		TIME += 0.5*dt;
 
-		if (nStep % nPrint == 0) WriteDataParaView();
+		if (nStep % nPrint == 0)
+			WriteDataParaView(opt.output_file, nStep);
 		printf("step: %d dt:%E\n", nStep, dt);
 	} while (nStep < nStop);
 	FreeMemory();
@@ -106,14 +105,14 @@ void TimeStepSize()
 	}
 }
 
-// input:  nStep, filename, TIME, n1, n2, n3, x1, x2, x3, u1Con, u2Con, u3Con, ronCon, tnCon
+// input:  TIME, n1, n2, n3, x1, x2, x3, u1Con, u2Con, u3Con, ronCon, tnCon
 // output: nothing
 // ??? tnCon or tCon, ronCon or roCon
-void WriteData()
+void WriteData(char *file, int step)
 {
-	char filename[50];
+	char filename[100];
 
-	sprintf(filename, "out_%d.tec", nStep);
+	sprintf(filename, "%s_%d.vtk", file, step);
 
 	FILE *fd = fopen(filename, "w");
 
@@ -133,13 +132,13 @@ void WriteData()
 	fclose(fd);
 }
 
-// input:  nStep, filename, TIME, n1, n2, n3, x1, x2, x3, u1nCon, u2nCon, u3nCon, ronCon, tnCon
+// input:  TIME, n1, n2, n3, x1, x2, x3, u1nCon, u2nCon, u3nCon, ronCon, tnCon
 // output: nothing
-void WriteDataParaView()
+void WriteDataParaView(char *file, int step)
 {
-	char filename[50];
+	char filename[100];
 
-	sprintf(filename, "out_%d.vtk", nStep);
+	sprintf(filename, "%s_%d.vtk", file, step);
 
 	FILE *fd = fopen(filename, "w");
 

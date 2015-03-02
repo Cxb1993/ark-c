@@ -7,7 +7,7 @@ Options checkOptions(Options opt);
 Options parseOptions(int argc, char *argv[])
 {
 	Options opt = parse(argc, argv);
-	if (!opt.mode)
+	if (opt.mode)
 		return opt;
     return checkOptions(opt);
 }
@@ -16,23 +16,15 @@ Options init()
 {
 	Options opt;
 	opt.mode = 0;
-    opt.program_name = opt.version_name = opt.version_number = 0;
+    opt.program_name = opt.version_name = opt.version_number = opt.error_message = 0;
 	opt.debug_mode = 0;
 
 	opt.index_geometry = 0;
 	opt.n1g = opt.n2g = opt.n3g = opt.nPrint = opt.nStop = 0;
-	opt.delta = opt.kappa = opt.cfl = 0;
+	opt.delta = opt.kappa = opt.cfl = 0.;
 
     opt.input_file = opt.output_file = 0;
     opt.gpu_mode = 0;
-	return opt;
-}
-
-Options checkOptions(Options opt)
-{
-	if (!opt.index_geometry || !opt.n1g || !opt.n2g || !opt.n3g || !opt.nPrint ||
-		!opt.nStop || !opt.delta || !opt.kappa || !opt.cfl || !opt.kappa || !opt.cfl)
-		opt.mode = -1;
 	return opt;
 }
 
@@ -126,16 +118,31 @@ Options parse(int argc, char *argv[])
             break;
         case ':':
             opt.mode = -1; // TODO: error
+			opt.error_message = "some error";
             break;
         case '?':
         default:
             opt.mode = -1; // TODO: error
+			opt.error_message = "some error";
             break;
         }
         longindex = -1;
     }
     //if (optind != argc - 1)
         //error_mode = true; // TODO: error
+	return opt;
+}
+
+Options checkOptions(Options opt)
+{
+	if (opt.index_geometry <= 0 ||
+		opt.n1g <= 0 || opt.n2g <= 0 || opt.n3g <= 0 ||
+		opt.nPrint <= 0 || opt.nStop <= 0 ||
+		(opt.delta < DBL_MIN) || (opt.kappa < DBL_MIN) || (opt.cfl < DBL_MIN)
+	) {
+		opt.mode = -1;
+		opt.error_message = "you forgot parametrs";
+	}
 	return opt;
 }
 
@@ -162,6 +169,7 @@ void helpPrint(Options opt)
 		kovcheg -l 2 -x 32 -y 32 -z 64 -p 50 -s 1000 -d 1.0 -k 1.0 -c 0.3\n \
 		kovcheg -l 2 -x 64 -y 64 -z 64 --interval-print 100 -s 500 --delta 1.0 -k 1 --cfl 0.3\n",
 		opt.program_name);
+	versionPrint(opt);
 }
 
 void versionPrint(Options opt)
@@ -171,7 +179,8 @@ void versionPrint(Options opt)
 
 void errorPrint(Options opt)
 {
-    printf("Error\n");
+    printf("%s\n", opt.error_message);
+	versionPrint(opt);
 }
 
 void infoPrint(Options opt)
@@ -181,6 +190,7 @@ void infoPrint(Options opt)
 		program_name = %s\n \
 		version_name = %s\n \
 		version_number = %s\n \
+		error_message = %s\n \
 		debug_mode = %d\n \
 		index_geometry = %d\n \
 		n1g = %d\n \
@@ -194,7 +204,7 @@ void infoPrint(Options opt)
 		input_file = %s\n \
 		output_file = %s\n \
 		gpu_mode = %d\n",
-		opt.mode, opt.program_name, opt.version_name, opt.version_number, opt.debug_mode,
+		opt.mode, opt.program_name, opt.version_name, opt.version_number, opt.error_message, opt.debug_mode,
 		opt.index_geometry, opt.n1g, opt.n2g, opt.n3g, opt.nPrint, opt.nStop,
 		opt.delta, opt.kappa, opt.cfl,
 		opt.input_file, opt.output_file, opt.gpu_mode);

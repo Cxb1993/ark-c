@@ -5,7 +5,7 @@ X = 16     # число вычислительный узлов по X1
 Y = 16     # число вычислительный узлов по X2
 Z = 32     # число вычислительный узлов по X3
 P = 50     # шаг печати
-S = 1000   # количество шагов
+S = 100   # количество шагов
 D = 1.0    # delta
 K = 1.0    # kappa
 C = 0.3    # cfl
@@ -21,8 +21,14 @@ NUMBER_STEPS   = $(S)
 DELTA          = $(D)
 KAPPA          = $(K)
 CFL            = $(C)
-INPUT          = inputFile
-OUTPUT         = outputFile
+
+INPUT_DIR   = input
+INPUT_FILE  = 
+OUTPUT_DIR  = output
+OUTPUT_FILE = out
+
+INPUT  = $(INPUT_DIR)/$(INPUT_FILE)
+OUTPUT = $(OUTPUT_DIR)/$(OUTPUT_FILE)
 
 ARGUMENTS   = --index-geometry $(INDEX_GEOMETRY) \
 				-x $(NUM_NODE_X) -y $(NUM_NODE_Y) -z $(NUM_NODE_Z) \
